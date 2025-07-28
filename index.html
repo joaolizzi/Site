@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMG - Candidaturas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 900px;
+            width: 100%;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .chat-message {
+            background-color: #e0e7ff;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            max-width: 80%;
+            align-self: flex-start;
+        }
+        .user-message {
+            background-color: #d1fae5;
+            align-self: flex-end;
+        }
+        .input-group {
+            margin-top: 1rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="number"],
+        .input-group input[type="password"],
+        .input-group input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            box-sizing: border-box;
+            margin-bottom: 0.5rem;
+        }
+        .input-group button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .file-preview {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: contain;
+            margin-top: 0.5rem;
+            border-radius: 0.5rem;
+        }
+        .data-table th, .data-table td {
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        .data-table th {
+            background-color: #eff6ff;
+            font-weight: 600;
+        }
+        .data-table img {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: contain;
+            border-radius: 0.25rem;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-extrabold text-indigo-700 text-center mb-6">
+            MMG - Candidatura de Emprego
+        </h1>
+
+        <!-- Chatbot Section -->
+        <div id="chatbotSection" class="border p-6 rounded-lg mb-8 shadow-md">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Entrevista de Candidatura</h2>
+            <div id="chatMessages" class="flex flex-col space-y-3 h-64 overflow-y-auto p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+                <!-- Chat messages will appear here -->
+            </div>
+            <div id="chatInputArea" class="input-group">
+                <!-- Input fields will be dynamically added here -->
+            </div>
+            <div id="loadingChat" class="text-center text-gray-600 hidden mt-4">A enviar dados...</div>
+        </div>
+
+        <!-- Data Access Section -->
+        <div id="dataAccessSection" class="border p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">Acesso aos Dados das Candidaturas</h2>
+            <div id="loginForm" class="flex flex-col items-center">
+                <label for="adminPassword" class="mb-2 text-lg">Palavra-passe de Acesso:</label>
+                <input type="password" id="adminPassword" class="w-full max-w-xs p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4 text-center" placeholder="Digite a palavra-passe">
+                <button id="accessDataBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
+                    Aceder aos Dados
+                </button>
+                <p id="loginMessage" class="text-red-500 mt-2 hidden">Palavra-passe incorreta.</p>
+            </div>
+
+            <div id="dataDisplayArea" class="hidden mt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Candidaturas Registadas</h3>
+                <div id="loadingData" class="text-center text-gray-600 hidden">A carregar dados...</div>
+                <div id="noDataMessage" class="text-center text-gray-600 hidden">Nenhuma candidatura encontrada.</div>
+                <div class="overflow-x-auto">
+                    <table class="data-table w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th>ID Utilizador</th>
+                                <th>Nome Completo</th>
+                                <th>Idade</th>
+                                <th>CPF</th>
+                                <th>RG</th>
+                                <th>PIS</th>
+                                <th>Comprovante de Residência</th>
+                                <th>Foto CPF</th>
+                                <th>Foto RG</th>
+                                <th>Data de Submissão</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicationsTableBody">
+                            <!-- Application data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importa as funções necessárias do Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variáveis globais fornecidas pelo ambiente Canvas
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+        let currentUserId = null; // Changed from userId to currentUserId to avoid conflict
+
+        // Elementos do DOM
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInputArea = document.getElementById('chatInputArea');
+        const loadingChat = document.getElementById('loadingChat');
+        const adminPasswordInput = document.getElementById('adminPassword');
+        const accessDataBtn = document.getElementById('accessDataBtn');
+        const loginMessage = document.getElementById('loginMessage');
+        const dataDisplayArea = document.getElementById('dataDisplayArea');
+        const loadingData = document.getElementById('loadingData');
+        const noDataMessage = document.getElementById('noDataMessage');
+        const applicationsTableBody = document.getElementById('applicationsTableBody');
+
+        // Estado do Chatbot
+        const questions = [
+            { id: 'fullName', text: 'Olá! Para começar, qual é o seu nome completo?', type: 'text' },
+            { id: 'age', text: 'Qual é a sua idade?', type: 'number' },
+            { id: 'cpf', text: 'Por favor, digite o número do seu CPF.', type: 'text' },
+            { id: 'rg', text: 'Agora, o número do seu RG.', type: 'text' },
+            { id: 'pis', text: 'E o número do seu PIS?', type: 'text' },
+            { id: 'proofOfResidencePhoto', text: 'Por favor, envie uma foto do seu comprovante de residência.', type: 'file' },
+            { id: 'cpfPhoto', text: 'Agora, uma foto do seu CPF.', type: 'file' },
+            { id: 'rgPhoto', text: 'E por último, uma foto do seu RG.', type: 'file' }
+        ];
+        let currentQuestionIndex = 0;
+        let collectedData = {};
+
+        // Palavra-passe de acesso (para demonstração)
+        const ADMIN_PASSWORD = 'mmgadmin';
+
+        // Função para inicializar o Firebase e autenticar o utilizador
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                currentUserId = auth.currentUser?.uid || crypto.randomUUID();
+                console.log("Firebase inicializado e utilizador autenticado:", currentUserId);
+                displayQuestion(); // Inicia o chatbot após a inicialização do Firebase
+            } catch (error) {
+                console.error("Erro ao inicializar Firebase ou autenticar:", error);
+                addBotMessage("Desculpe, houve um erro ao iniciar o serviço. Por favor, tente novamente mais tarde.");
+            }
+        }
+
+        // Adiciona uma mensagem do bot ao chat
+        function addBotMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message');
+            messageDiv.innerText = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+        }
+
+        // Adiciona uma mensagem do utilizador ao chat
+        function addUserMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', 'user-message');
+            messageDiv.innerText = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+        }
+
+        // Exibe a próxima pergunta no chat
+        function displayQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                addBotMessage(q.text);
+                renderInput(q.id, q.type);
+            } else {
+                addBotMessage('Obrigado! A sua candidatura foi concluída. Por favor, aguarde o processamento.');
+                chatInputArea.innerHTML = ''; // Remove input fields
+                submitApplication();
+            }
+        }
+
+        // Renderiza o campo de input apropriado
+        function renderInput(id, type) {
+            chatInputArea.innerHTML = ''; // Clear previous input
+            const inputGroup = document.createElement('div');
+            inputGroup.classList.add('input-group');
+
+            if (type === 'file') {
+                const label = document.createElement('label');
+                label.setAttribute('for', id);
+                label.innerText = 'Selecione o ficheiro:';
+                inputGroup.appendChild(label);
+
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.id = id;
+                fileInput.accept = 'image/*'; // Aceita apenas imagens
+                inputGroup.appendChild(fileInput);
+
+                const previewImg = document.createElement('img');
+                previewImg.id = `${id}-preview`;
+                previewImg.classList.add('file-preview', 'hidden');
+                inputGroup.appendChild(previewImg);
+
+                fileInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            previewImg.src = e.target.result;
+                            previewImg.classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewImg.classList.add('hidden');
+                        previewImg.src = '';
+                    }
+                });
+
+                const sendButton = document.createElement('button');
+                sendButton.innerText = 'Enviar Ficheiro';
+                sendButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'text-white', 'py-2', 'px-4', 'rounded');
+                sendButton.addEventListener('click', () => handleInput(id, type, fileInput));
+                inputGroup.appendChild(sendButton);
+
+            } else {
+                const inputField = document.createElement('input');
+                inputField.type = type;
+                inputField.id = id;
+                inputField.placeholder = `Digite seu ${id.replace(/([A-Z])/g, ' $1').toLowerCase()}...`;
+                inputGroup.appendChild(inputField);
+
+                const sendButton = document.createElement('button');
+                sendButton.innerText = 'Enviar';
+                sendButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'text-white', 'py-2', 'px-4', 'rounded');
+                sendButton.addEventListener('click', () => handleInput(id, type, inputField));
+                inputGroup.appendChild(sendButton);
+
+                inputField.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        sendButton.click();
+                    }
+                });
+            }
+            chatInputArea.appendChild(inputGroup);
+        }
+
+        // Lida com a entrada do utilizador
+        async function handleInput(id, type, inputElement) {
+            let value;
+            if (type === 'file') {
+                const file = inputElement.files[0];
+                if (!file) {
+                    addBotMessage('Por favor, selecione um ficheiro.');
+                    return;
+                }
+                loadingChat.classList.remove('hidden');
+                value = await readFileAsBase64(file);
+                loadingChat.classList.add('hidden');
+                addUserMessage(`Ficheiro ${file.name} enviado.`);
+            } else {
+                value = inputElement.value.trim();
+                if (!value) {
+                    addBotMessage('Por favor, digite a sua resposta.');
+                    return;
+                }
+                addUserMessage(value);
+            }
+
+            collectedData[id] = value;
+            inputElement.value = ''; // Limpa o campo de input
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+
+        // Função para ler ficheiro como Base64
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Submete os dados da candidatura para o Firestore
+        async function submitApplication() {
+            if (!db) {
+                console.error("Firestore não inicializado.");
+                addBotMessage("Desculpe, não foi possível submeter a sua candidatura. Tente novamente mais tarde.");
+                return;
+            }
+
+            loadingChat.classList.remove('hidden');
+            try {
+                const applicationsCollection = collection(db, `artifacts/${appId}/public/data/mmg_applications`);
+                await addDoc(applicationsCollection, {
+                    userId: currentUserId,
+                    ...collectedData,
+                    submissionDate: new Date().toISOString()
+                });
+                addBotMessage('A sua candidatura foi submetida com sucesso! Obrigado.');
+            } catch (e) {
+                console.error("Erro ao adicionar documento: ", e);
+                addBotMessage('Desculpe, houve um erro ao submeter a sua candidatura. Por favor, tente novamente.');
+            } finally {
+                loadingChat.classList.add('hidden');
+            }
+        }
+
+        // Lógica de acesso aos dados
+        accessDataBtn.addEventListener('click', () => {
+            const password = adminPasswordInput.value;
+            if (password === ADMIN_PASSWORD) {
+                loginMessage.classList.add('hidden');
+                dataDisplayArea.classList.remove('hidden');
+                loadApplicationsData();
+            } else {
+                loginMessage.classList.remove('hidden');
+                dataDisplayArea.classList.add('hidden');
+            }
+        });
+
+        // Carrega os dados das candidaturas do Firestore
+        function loadApplicationsData() {
+            if (!db) {
+                console.error("Firestore não inicializado.");
+                loadingData.classList.add('hidden');
+                noDataMessage.classList.remove('hidden');
+                noDataMessage.innerText = 'Erro: Serviço de dados não disponível.';
+                return;
+            }
+
+            loadingData.classList.remove('hidden');
+            noDataMessage.classList.add('hidden');
+            applicationsTableBody.innerHTML = ''; // Limpa a tabela
+
+            const applicationsCollectionRef = collection(db, `artifacts/${appId}/public/data/mmg_applications`);
+            const q = query(applicationsCollectionRef);
+
+            onSnapshot(q, (snapshot) => {
+                loadingData.classList.add('hidden');
+                if (snapshot.empty) {
+                    noDataMessage.classList.remove('hidden');
+                    noDataMessage.innerText = 'Nenhuma candidatura encontrada.';
+                    return;
+                }
+                noDataMessage.classList.add('hidden');
+                applicationsTableBody.innerHTML = ''; // Limpa a tabela antes de adicionar novos dados
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const row = applicationsTableBody.insertRow();
+
+                    row.insertCell().innerText = data.userId || 'N/A';
+                    row.insertCell().innerText = data.fullName || 'N/A';
+                    row.insertCell().innerText = data.age || 'N/A';
+                    row.insertCell().innerText = data.cpf || 'N/A';
+                    row.insertCell().innerText = data.rg || 'N/A';
+                    row.insertCell().innerText = data.pis || 'N/A';
+
+                    // Células para fotos
+                    const residenceCell = row.insertCell();
+                    if (data.proofOfResidencePhoto) {
+                        const img = document.createElement('img');
+                        img.src = data.proofOfResidencePhoto;
+                        img.alt = 'Comprovante de Residência';
+                        residenceCell.appendChild(img);
+                    } else {
+                        residenceCell.innerText = 'N/A';
+                    }
+
+                    const cpfPhotoCell = row.insertCell();
+                    if (data.cpfPhoto) {
+                        const img = document.createElement('img');
+                        img.src = data.cpfPhoto;
+                        img.alt = 'CPF';
+                        cpfPhotoCell.appendChild(img);
+                    } else {
+                        cpfPhotoCell.innerText = 'N/A';
+                    }
+
+                    const rgPhotoCell = row.insertCell();
+                    if (data.rgPhoto) {
+                        const img = document.createElement('img');
+                        img.src = data.rgPhoto;
+                        img.alt = 'RG';
+                        rgPhotoCell.appendChild(img);
+                    } else {
+                        rgPhotoCell.innerText = 'N/A';
+                    }
+
+                    row.insertCell().innerText = data.submissionDate ? new Date(data.submissionDate).toLocaleString() : 'N/A';
+                });
+            }, (error) => {
+                console.error("Erro ao carregar dados: ", error);
+                loadingData.classList.add('hidden');
+                noDataMessage.classList.remove('hidden');
+                noDataMessage.innerText = 'Erro ao carregar candidaturas.';
+            });
+        }
+
+        // Inicializa o Firebase quando a janela carrega
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>
