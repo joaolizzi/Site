@@ -188,6 +188,31 @@
       margin-bottom: 20px;
     }
     
+    .admin-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    
+    .search-button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0 20px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
     #adminPassword {
       flex: 1;
       padding: 12px 15px;
@@ -301,6 +326,10 @@
       .message {
         max-width: 90%;
       }
+      
+      .admin-tools {
+        flex-direction: column;
+      }
     }
     
     /* Estados */
@@ -342,6 +371,11 @@
       <div class="card">
         <h2>Painel Administrativo</h2>
         <div id="adminControls">
+          <div class="admin-tools">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nome ou CPF...">
+            <button id="searchButton" class="search-button">Buscar</button>
+            <button id="resetSearch" class="search-button">Limpar Busca</button>
+          </div>
           <div id="loadingData" class="loading hidden">Carregando dados...</div>
           <div id="noDataMessage" class="hidden">Nenhuma candidatura encontrada.</div>
           <div class="table-responsive">
@@ -350,6 +384,7 @@
                 <tr>
                   <th>ID</th>
                   <th>Nome</th>
+                  <th>Telefone</th>
                   <th>Idade</th>
                   <th>CPF</th>
                   <th>Data</th>
@@ -383,7 +418,7 @@
 
   <script type="module">
     import { db, auth } from './firebase-app.js';
-    import { collection, addDoc, onSnapshot, query, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { collection, addDoc, onSnapshot, query, doc, getDoc, where, or } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -401,17 +436,22 @@
       const modalImage = document.getElementById('modalImage');
       const modalTitle = document.getElementById('modalTitle');
       const closeModal = document.querySelector('.close-modal');
+      const searchInput = document.getElementById('searchInput');
+      const searchButton = document.getElementById('searchButton');
+      const resetSearch = document.getElementById('resetSearch');
 
       // Configurações
       const ADMIN_PASSWORD = 'mmgadmin';
       let currentUserId = null;
       let currentQuestionIndex = 0;
       let collectedData = {};
+      let applicationsSnapshot = [];
 
-      // Fluxo de perguntas
+      // Fluxo de perguntas (agora incluindo telefone)
       const questions = [
         { id: 'fullName', text: 'Olá! Para começar, qual é o seu nome completo?', type: 'text' },
         { id: 'age', text: 'Qual é a sua idade?', type: 'number' },
+        { id: 'phone', text: 'Por favor, digite seu número de telefone com DDD:', type: 'text' },
         { id: 'cpf', text: 'Por favor, digite o número do seu CPF.', type: 'text' },
         { id: 'rg', text: 'Agora, o número do seu RG.', type: 'text' },
         { id: 'pis', text: 'E o número do seu PIS?', type: 'text' },
@@ -429,6 +469,7 @@
         currentUserId = auth.currentUser?.uid || crypto.randomUUID();
         displayQuestion();
         setupModal();
+        setupSearch();
       }
 
       function displayQuestion() {
@@ -500,6 +541,21 @@
           input.id = id;
           input.placeholder = `Digite seu ${id.replace(/([A-Z])/g, ' $1').toLowerCase()}...`;
           
+          // Adiciona máscara para telefone se for o campo de phone
+          if (id === 'phone') {
+            input.addEventListener('input', function(e) {
+              let value = e.target.value.replace(/\D/g, '');
+              if (value.length > 11) value = value.substring(0, 11);
+              
+              // Formatação: (XX) XXXXX-XXXX
+              if (value.length > 0) {
+                value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7, 11)}`;
+              }
+              
+              e.target.value = value;
+            });
+          }
+          
           const sendButton = document.createElement('button');
           sendButton.textContent = 'Enviar';
           sendButton.addEventListener('click', () => handleTextInput(id, input));
@@ -534,17 +590,31 @@
       }
 
       function handleTextInput(id, input) {
-        const value = input.value.trim();
+        let value = input.value.trim();
+        
+        // Remove formatação do telefone antes de salvar
+        if (id === 'phone') {
+          value = value.replace(/\D/g, '');
+        }
+        
         if (!value) {
           addBotMessage('Por favor, preencha este campo.');
           return;
         }
 
         collectedData[id] = value;
-        addUserMessage(value);
+        addUserMessage(id === 'phone' ? formatPhoneNumber(value) : value);
         input.value = '';
         currentQuestionIndex++;
         displayQuestion();
+      }
+
+      function formatPhoneNumber(phone) {
+        // Formata o telefone para exibição: (XX) XXXXX-XXXX
+        if (phone.length === 11) {
+          return `(${phone.substring(0, 2)}) ${phone.substring(2, 7)}-${phone.substring(7, 11)}`;
+        }
+        return phone;
       }
 
       async function submitApplication() {
@@ -609,6 +679,56 @@
         }
       });
 
+      function setupSearch() {
+        searchButton.addEventListener('click', searchApplications);
+        resetSearch.addEventListener('click', resetSearchResults);
+        searchInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') searchApplications();
+        });
+      }
+
+      function searchApplications() {
+        const searchTerm = searchInput.value.trim();
+        if (!searchTerm) {
+          alert('Por favor, digite um nome ou CPF para buscar.');
+          return;
+        }
+
+        loadingData.classList.remove('hidden');
+        applicationsTableBody.innerHTML = '';
+
+        // Busca por nome (contendo o termo) ou CPF (igual ao termo)
+        const q = query(
+          collection(db, 'applications'),
+          or(
+            where('fullName', '>=', searchTerm),
+            where('fullName', '<=', searchTerm + '\uf8ff'),
+            where('cpf', '==', searchTerm.replace(/\D/g, ''))
+        ));
+
+        onSnapshot(q, (snapshot) => {
+          loadingData.classList.add('hidden');
+          
+          if (snapshot.empty) {
+            noDataMessage.classList.remove('hidden');
+            noDataMessage.textContent = 'Nenhuma candidatura encontrada com os critérios de busca.';
+            return;
+          }
+
+          renderApplicationsTable(snapshot);
+        }, (error) => {
+          console.error('Erro ao buscar candidaturas:', error);
+          loadingData.classList.add('hidden');
+          noDataMessage.classList.remove('hidden');
+          noDataMessage.textContent = 'Erro ao buscar candidaturas.';
+        });
+      }
+
+      function resetSearchResults() {
+        searchInput.value = '';
+        loadApplications();
+      }
+
       function loadApplications() {
         loadingData.classList.remove('hidden');
         noDataMessage.classList.add('hidden');
@@ -618,6 +738,7 @@
 
         onSnapshot(q, (snapshot) => {
           loadingData.classList.add('hidden');
+          applicationsSnapshot = snapshot; // Armazena o snapshot para uso posterior
           
           if (snapshot.empty) {
             noDataMessage.classList.remove('hidden');
@@ -625,39 +746,50 @@
             return;
           }
 
-          applicationsTableBody.innerHTML = '';
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const row = document.createElement('tr');
-            
-            // Células básicas
-            row.innerHTML = `
-              <td>${doc.id}</td>
-              <td>${data.fullName || 'N/A'}</td>
-              <td>${data.age || 'N/A'}</td>
-              <td>${data.cpf || 'N/A'}</td>
-              <td>${new Date(data.submissionDate).toLocaleString()}</td>
-              <td class="photo-cell">${renderPhotoCell(data.rgFrontPhoto)}</td>
-              <td class="photo-cell">${renderPhotoCell(data.rgBackPhoto)}</td>
-              <td class="photo-cell">${renderPhotoCell(data.cpfPhoto)}</td>
-              <td class="photo-cell">${renderPhotoCell(data.proofOfResidencePhoto)}</td>
-              <td>
-                <button class="view-btn" data-id="${doc.id}">Ver Detalhes</button>
-              </td>
-            `;
-            
-            applicationsTableBody.appendChild(row);
-          });
-
-          // Adiciona eventos aos botões
-          document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', () => viewApplicationDetails(btn.dataset.id));
-          });
+          renderApplicationsTable(snapshot);
         }, (error) => {
           console.error('Erro ao carregar candidaturas:', error);
           loadingData.classList.add('hidden');
           noDataMessage.classList.remove('hidden');
           noDataMessage.textContent = 'Erro ao carregar candidaturas.';
+        });
+      }
+
+      function renderApplicationsTable(snapshot) {
+        applicationsTableBody.innerHTML = '';
+        noDataMessage.classList.add('hidden');
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const row = document.createElement('tr');
+          
+          // Formata o telefone para exibição
+          const formattedPhone = data.phone ? 
+            `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
+            'N/A';
+          
+          row.innerHTML = `
+            <td>${doc.id}</td>
+            <td>${data.fullName || 'N/A'}</td>
+            <td>${formattedPhone}</td>
+            <td>${data.age || 'N/A'}</td>
+            <td>${data.cpf || 'N/A'}</td>
+            <td>${new Date(data.submissionDate).toLocaleString()}</td>
+            <td class="photo-cell">${renderPhotoCell(data.rgFrontPhoto)}</td>
+            <td class="photo-cell">${renderPhotoCell(data.rgBackPhoto)}</td>
+            <td class="photo-cell">${renderPhotoCell(data.cpfPhoto)}</td>
+            <td class="photo-cell">${renderPhotoCell(data.proofOfResidencePhoto)}</td>
+            <td>
+              <button class="view-btn" data-id="${doc.id}">Ver Detalhes</button>
+            </td>
+          `;
+          
+          applicationsTableBody.appendChild(row);
+        });
+
+        // Adiciona eventos aos botões
+        document.querySelectorAll('.view-btn').forEach(btn => {
+          btn.addEventListener('click', () => viewApplicationDetails(btn.dataset.id));
         });
       }
 
@@ -690,38 +822,75 @@
         
         if (docSnap.exists()) {
           const data = docSnap.data();
+          // Formata o telefone para exibição
+          const formattedPhone = data.phone ? 
+            `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
+            'Não informado';
+          
           let details = `
-            <h3>Detalhes da Candidatura</h3>
-            <p><strong>ID:</strong> ${appId}</p>
-            <p><strong>Nome:</strong> ${data.fullName}</p>
-            <p><strong>Idade:</strong> ${data.age}</p>
-            <p><strong>CPF:</strong> ${data.cpf}</p>
-            <p><strong>RG:</strong> ${data.rg}</p>
-            <p><strong>PIS:</strong> ${data.pis}</p>
-            <p><strong>Data:</strong> ${new Date(data.submissionDate).toLocaleString()}</p>
-            
-            <h4 style="margin-top:20px;">Documentos</h4>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-              <div>
-                <h5>Frente do RG</h5>
-                <img src="${data.rgFrontPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.rgFrontPhoto}', 'Frente do RG')">
+            <div style="max-width: 800px; padding: 20px;">
+              <h3 style="color: var(--primary); margin-bottom: 20px;">Detalhes da Candidatura</h3>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                  <p><strong>ID:</strong> ${appId}</p>
+                  <p><strong>Nome:</strong> ${data.fullName}</p>
+                  <p><strong>Telefone:</strong> ${formattedPhone}</p>
+                  <p><strong>Idade:</strong> ${data.age}</p>
+                </div>
+                <div>
+                  <p><strong>CPF:</strong> ${data.cpf}</p>
+                  <p><strong>RG:</strong> ${data.rg}</p>
+                  <p><strong>PIS:</strong> ${data.pis}</p>
+                  <p><strong>Data:</strong> ${new Date(data.submissionDate).toLocaleString()}</p>
+                </div>
               </div>
-              <div>
-                <h5>Verso do RG</h5>
-                <img src="${data.rgBackPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.rgBackPhoto}', 'Verso do RG')">
-              </div>
-              <div>
-                <h5>CPF</h5>
-                <img src="${data.cpfPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.cpfPhoto}', 'CPF')">
-              </div>
-              <div>
-                <h5>Comprovante</h5>
-                <img src="${data.proofOfResidencePhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.proofOfResidencePhoto}', 'Comprovante')">
+              
+              <h4 style="margin: 20px 0 10px; color: var(--primary);">Documentos</h4>
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                <div>
+                  <h5>Frente do RG</h5>
+                  <img src="${data.rgFrontPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.rgFrontPhoto}', 'Frente do RG')">
+                </div>
+                <div>
+                  <h5>Verso do RG</h5>
+                  <img src="${data.rgBackPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.rgBackPhoto}', 'Verso do RG')">
+                </div>
+                <div>
+                  <h5>CPF</h5>
+                  <img src="${data.cpfPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.cpfPhoto}', 'CPF')">
+                </div>
+                <div>
+                  <h5>Comprovante</h5>
+                  <img src="${data.proofOfResidencePhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.proofOfResidencePhoto}', 'Comprovante')">
+                </div>
               </div>
             </div>
           `;
           
-          alert(details); // Substitua por um modal mais bonito se preferir
+          // Cria um modal para mostrar os detalhes
+          const detailModal = document.createElement('div');
+          detailModal.className = 'modal';
+          detailModal.innerHTML = `
+            <div class="modal-content" style="max-width: 900px;">
+              <div class="modal-header">
+                <h3>Detalhes da Candidatura</h3>
+                <span class="close-modal">&times;</span>
+              </div>
+              <div class="modal-body">
+                ${details}
+              </div>
+            </div>
+          `;
+          
+          document.body.appendChild(detailModal);
+          detailModal.style.display = 'block';
+          
+          // Adiciona evento para fechar o modal
+          detailModal.querySelector('.close-modal').addEventListener('click', () => {
+            detailModal.style.display = 'none';
+            setTimeout(() => detailModal.remove(), 300);
+          });
         } else {
           alert('Candidatura não encontrada!');
         }
