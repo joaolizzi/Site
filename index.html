@@ -331,8 +331,6 @@
         flex-direction: column;
       }
     }
-    
-    /* Estados */
     .hidden {
       display: none;
     }
@@ -440,14 +438,14 @@
       const searchButton = document.getElementById('searchButton');
       const resetSearch = document.getElementById('resetSearch');
 
-      // Configurações
+      // senha
       const ADMIN_PASSWORD = 'mmgadmin';
       let currentUserId = null;
       let currentQuestionIndex = 0;
       let collectedData = {};
       let applicationsSnapshot = [];
 
-      // Fluxo de perguntas (agora incluindo telefone)
+      // Fluxo de perguntas 
       const questions = [
         { id: 'fullName', text: 'Olá! Para começar, qual é o seu nome completo?', type: 'text' },
         { id: 'age', text: 'Qual é a sua idade?', type: 'number' },
