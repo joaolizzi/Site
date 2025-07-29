@@ -90,6 +90,11 @@
       margin-right: auto;
     }
     
+    .bot-message strong {
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
     .user-message {
       background-color: var(--primary);
       color: white;
@@ -330,7 +335,23 @@
       .admin-tools {
         flex-direction: column;
       }
+      
+      /* Ajustes específicos para mobile */
+      #chatContainer {
+        height: 70vh;
+      }
+      
+      .file-preview img {
+        max-width: 100px;
+        max-height: 100px;
+      }
+      
+      .input-group button {
+        padding: 12px;
+      }
     }
+    
+    /* Estados */
     .hidden {
       display: none;
     }
@@ -339,6 +360,20 @@
       text-align: center;
       padding: 20px;
       color: var(--gray);
+    }
+    
+    /* Estilo para as perguntas enumeradas */
+    .question-number {
+      display: inline-block;
+      background-color: var(--primary);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      margin-right: 8px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -438,16 +473,16 @@
       const searchButton = document.getElementById('searchButton');
       const resetSearch = document.getElementById('resetSearch');
 
-      // senha
+      // Configurações
       const ADMIN_PASSWORD = 'mmgadmin';
       let currentUserId = null;
       let currentQuestionIndex = 0;
       let collectedData = {};
       let applicationsSnapshot = [];
 
-      // Fluxo de perguntas 
+      // Fluxo de perguntas (agora com telefone)
       const questions = [
-        { id: 'fullName', text: 'Olá! Para começar, qual é o seu nome completo?', type: 'text' },
+        { id: 'fullName', text: 'Para começar, qual é o seu nome completo?', type: 'text' },
         { id: 'age', text: 'Qual é a sua idade?', type: 'number' },
         { id: 'phone', text: 'Por favor, digite seu número de telefone com DDD:', type: 'text' },
         { id: 'cpf', text: 'Por favor, digite o número do seu CPF.', type: 'text' },
@@ -465,6 +500,8 @@
       // Funções principais
       function initApplication() {
         currentUserId = auth.currentUser?.uid || crypto.randomUUID();
+        // Adiciona mensagem de boas-vindas
+        addBotMessage('Olá! Vamos começar sua candidatura. Por favor, responda às seguintes perguntas:');
         displayQuestion();
         setupModal();
         setupSearch();
@@ -473,7 +510,9 @@
       function displayQuestion() {
         if (currentQuestionIndex < questions.length) {
           const q = questions[currentQuestionIndex];
-          addBotMessage(q.text);
+          // Adiciona número da pergunta e texto em negrito
+          const questionText = `<span class="question-number">${currentQuestionIndex + 1}</span> <strong>${q.text}</strong>`;
+          addBotMessage(questionText);
           renderInput(q.id, q.type);
         } else {
           addBotMessage('Obrigado! Sua candidatura está sendo processada...');
@@ -577,14 +616,20 @@
         }
 
         loadingChat.classList.remove('hidden');
-        const file = files[0];
-        const base64 = await readFileAsBase64(file);
-        collectedData[id] = base64;
-        addUserMessage(`Arquivo enviado: ${file.name}`);
-        input.value = '';
-        currentQuestionIndex++;
-        loadingChat.classList.add('hidden');
-        displayQuestion();
+        try {
+          const file = files[0];
+          const base64 = await readFileAsBase64(file);
+          collectedData[id] = base64;
+          addUserMessage(`Arquivo enviado: ${file.name}`);
+          input.value = '';
+          currentQuestionIndex++;
+          displayQuestion();
+        } catch (error) {
+          console.error('Erro ao processar arquivo:', error);
+          addBotMessage('Ocorreu um erro ao processar seu arquivo. Por favor, tente novamente.');
+        } finally {
+          loadingChat.classList.add('hidden');
+        }
       }
 
       function handleTextInput(id, input) {
@@ -593,6 +638,10 @@
         // Remove formatação do telefone antes de salvar
         if (id === 'phone') {
           value = value.replace(/\D/g, '');
+          if (value.length < 10) {
+            addBotMessage('Por favor, digite um número de telefone válido com DDD.');
+            return;
+          }
         }
         
         if (!value) {
@@ -618,6 +667,15 @@
       async function submitApplication() {
         loadingChat.classList.remove('hidden');
         try {
+          // Verifica se todos os campos obrigatórios foram preenchidos
+          const requiredFields = ['fullName', 'age', 'phone', 'cpf', 'rg', 'pis', 
+                                'proofOfResidencePhoto', 'cpfPhoto', 'rgFrontPhoto', 'rgBackPhoto'];
+          const missingFields = requiredFields.filter(field => !collectedData[field]);
+          
+          if (missingFields.length > 0) {
+            throw new Error(`Faltam campos obrigatórios: ${missingFields.join(', ')}`);
+          }
+
           const docRef = await addDoc(collection(db, 'applications'), {
             userId: currentUserId,
             ...collectedData,
@@ -629,7 +687,20 @@
           resetForm();
         } catch (error) {
           console.error('Erro ao enviar candidatura:', error);
-          addBotMessage(`❌ Erro ao enviar candidatura: ${error.message}`);
+          
+          // Tratamento específico para erro de permissão
+          if (error.message.includes('permission')) {
+            addBotMessage('❌ Erro: Sem permissão para enviar. Verifique sua conexão e tente novamente.');
+          } else {
+            addBotMessage(`❌ Erro ao enviar candidatura: ${error.message}`);
+          }
+          
+          // Permite tentar novamente
+          const retryButton = document.createElement('button');
+          retryButton.textContent = 'Tentar Novamente';
+          retryButton.style.marginTop = '10px';
+          retryButton.addEventListener('click', submitApplication);
+          chatInputArea.appendChild(retryButton);
         } finally {
           loadingChat.classList.add('hidden');
         }
@@ -645,7 +716,7 @@
       function addBotMessage(text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message bot-message';
-        messageDiv.textContent = text;
+        messageDiv.innerHTML = text; // Usamos innerHTML para permitir formatação
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
@@ -702,9 +773,10 @@
             where('fullName', '>=', searchTerm),
             where('fullName', '<=', searchTerm + '\uf8ff'),
             where('cpf', '==', searchTerm.replace(/\D/g, ''))
-        ));
+          )
+        );
 
-        onSnapshot(q, (snapshot) => {
+        const unsubscribe = onSnapshot(q, (snapshot) => {
           loadingData.classList.add('hidden');
           
           if (snapshot.empty) {
@@ -734,7 +806,7 @@
 
         const q = query(collection(db, 'applications'));
 
-        onSnapshot(q, (snapshot) => {
+        const unsubscribe = onSnapshot(q, (snapshot) => {
           loadingData.classList.add('hidden');
           applicationsSnapshot = snapshot; // Armazena o snapshot para uso posterior
           
