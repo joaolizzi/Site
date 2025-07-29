@@ -450,9 +450,20 @@
   </div>
 
   <script type="module">
-    import { db, auth } from './firebase-app.js';
-    import { collection, addDoc, onSnapshot, query, doc, getDoc, where, or } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    // Configuração do Firebase - Substitua com suas credenciais
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJETO.firebaseapp.com",
+      projectId: "SEU_PROJETO_ID",
+      storageBucket: "SEU_PROJETO.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID"
+    };
+
+    // Inicialização do Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
     document.addEventListener('DOMContentLoaded', () => {
       // Elementos do DOM
@@ -480,7 +491,7 @@
       let collectedData = {};
       let applicationsSnapshot = [];
 
-      // Fluxo de perguntas (agora com telefone)
+      // Fluxo de perguntas
       const questions = [
         { id: 'fullName', text: 'Para começar, qual é o seu nome completo?', type: 'text' },
         { id: 'age', text: 'Qual é a sua idade?', type: 'number' },
@@ -536,6 +547,7 @@
           fileInput.id = id;
           fileInput.accept = 'image/*';
           fileInput.className = 'file-upload';
+          fileInput.capture = 'environment'; // Melhor para mobile
           
           const previewContainer = document.createElement('div');
           previewContainer.className = 'file-preview-container';
@@ -676,26 +688,53 @@
             throw new Error(`Faltam campos obrigatórios: ${missingFields.join(', ')}`);
           }
 
-          const docRef = await addDoc(collection(db, 'applications'), {
+          // Prepara os dados para envio
+          const applicationData = {
             userId: currentUserId,
-            ...collectedData,
+            fullName: collectedData.fullName.toString().trim(),
+            age: parseInt(collectedData.age),
+            phone: collectedData.phone.toString().replace(/\D/g, ''),
+            cpf: collectedData.cpf.toString().replace(/\D/g, ''),
+            rg: collectedData.rg.toString().trim(),
+            pis: collectedData.pis.toString().trim(),
+            proofOfResidencePhoto: collectedData.proofOfResidencePhoto,
+            cpfPhoto: collectedData.cpfPhoto,
+            rgFrontPhoto: collectedData.rgFrontPhoto,
+            rgBackPhoto: collectedData.rgBackPhoto,
             submissionDate: new Date().toISOString(),
             status: 'pending'
-          });
+          };
+
+          // Verificação adicional para mobile
+          if (!applicationData.phone.match(/^\d{10,11}$/)) {
+            throw new Error('Telefone inválido. Deve conter 10 ou 11 dígitos.');
+          }
+
+          if (!applicationData.cpf.match(/^\d{11}$/)) {
+            throw new Error('CPF inválido. Deve conter 11 dígitos.');
+          }
+
+          const docRef = await db.collection('applications').add(applicationData);
           
           addBotMessage(`✅ Candidatura enviada com sucesso! Seu ID é: ${docRef.id}`);
           resetForm();
         } catch (error) {
           console.error('Erro ao enviar candidatura:', error);
           
-          // Tratamento específico para erro de permissão
-          if (error.message.includes('permission')) {
-            addBotMessage('❌ Erro: Sem permissão para enviar. Verifique sua conexão e tente novamente.');
+          let errorMessage = '❌ Erro ao enviar candidatura.';
+          
+          if (error.message.includes('invalid argument')) {
+            errorMessage = '❌ Dados inválidos. Verifique se preencheu todos os campos corretamente.';
+          } else if (error.message.includes('permission')) {
+            errorMessage = '❌ Sem permissão para enviar. Verifique sua conexão.';
           } else {
-            addBotMessage(`❌ Erro ao enviar candidatura: ${error.message}`);
+            errorMessage += ` ${error.message}`;
           }
           
-          // Permite tentar novamente
+          addBotMessage(errorMessage);
+          
+          // Botão para tentar novamente
+          chatInputArea.innerHTML = '';
           const retryButton = document.createElement('button');
           retryButton.textContent = 'Tentar Novamente';
           retryButton.style.marginTop = '10px';
@@ -767,31 +806,37 @@
         applicationsTableBody.innerHTML = '';
 
         // Busca por nome (contendo o termo) ou CPF (igual ao termo)
-        const q = query(
-          collection(db, 'applications'),
-          or(
-            where('fullName', '>=', searchTerm),
-            where('fullName', '<=', searchTerm + '\uf8ff'),
-            where('cpf', '==', searchTerm.replace(/\D/g, ''))
-          )
-        );
+        db.collection('applications')
+          .where('fullName', '>=', searchTerm)
+          .where('fullName', '<=', searchTerm + '\uf8ff')
+          .get()
+          .then((snapshot) => {
+            loadingData.classList.add('hidden');
+            
+            if (snapshot.empty) {
+              // Se não encontrou por nome, tenta por CPF
+              db.collection('applications')
+                .where('cpf', '==', searchTerm.replace(/\D/g, ''))
+                .get()
+                .then((cpfSnapshot) => {
+                  if (cpfSnapshot.empty) {
+                    noDataMessage.classList.remove('hidden');
+                    noDataMessage.textContent = 'Nenhuma candidatura encontrada com os critérios de busca.';
+                    return;
+                  }
+                  renderApplicationsTable(cpfSnapshot);
+                });
+              return;
+            }
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          loadingData.classList.add('hidden');
-          
-          if (snapshot.empty) {
+            renderApplicationsTable(snapshot);
+          })
+          .catch((error) => {
+            console.error('Erro ao buscar candidaturas:', error);
+            loadingData.classList.add('hidden');
             noDataMessage.classList.remove('hidden');
-            noDataMessage.textContent = 'Nenhuma candidatura encontrada com os critérios de busca.';
-            return;
-          }
-
-          renderApplicationsTable(snapshot);
-        }, (error) => {
-          console.error('Erro ao buscar candidaturas:', error);
-          loadingData.classList.add('hidden');
-          noDataMessage.classList.remove('hidden');
-          noDataMessage.textContent = 'Erro ao buscar candidaturas.';
-        });
+            noDataMessage.textContent = 'Erro ao buscar candidaturas.';
+          });
       }
 
       function resetSearchResults() {
@@ -804,25 +849,25 @@
         noDataMessage.classList.add('hidden');
         applicationsTableBody.innerHTML = '';
 
-        const q = query(collection(db, 'applications'));
+        db.collection('applications').get()
+          .then((snapshot) => {
+            loadingData.classList.add('hidden');
+            applicationsSnapshot = snapshot; // Armazena o snapshot para uso posterior
+            
+            if (snapshot.empty) {
+              noDataMessage.classList.remove('hidden');
+              noDataMessage.textContent = 'Nenhuma candidatura encontrada.';
+              return;
+            }
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          loadingData.classList.add('hidden');
-          applicationsSnapshot = snapshot; // Armazena o snapshot para uso posterior
-          
-          if (snapshot.empty) {
+            renderApplicationsTable(snapshot);
+          })
+          .catch((error) => {
+            console.error('Erro ao carregar candidaturas:', error);
+            loadingData.classList.add('hidden');
             noDataMessage.classList.remove('hidden');
-            noDataMessage.textContent = 'Nenhuma candidatura encontrada.';
-            return;
-          }
-
-          renderApplicationsTable(snapshot);
-        }, (error) => {
-          console.error('Erro ao carregar candidaturas:', error);
-          loadingData.classList.add('hidden');
-          noDataMessage.classList.remove('hidden');
-          noDataMessage.textContent = 'Erro ao carregar candidaturas.';
-        });
+            noDataMessage.textContent = 'Erro ao carregar candidaturas.';
+          });
       }
 
       function renderApplicationsTable(snapshot) {
@@ -887,85 +932,95 @@
       }
 
       async function viewApplicationDetails(appId) {
-        const docRef = doc(db, 'applications', appId);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          // Formata o telefone para exibição
-          const formattedPhone = data.phone ? 
-            `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
-            'Não informado';
-          
-          let details = `
-            <div style="max-width: 800px; padding: 20px;">
-              <h3 style="color: var(--primary); margin-bottom: 20px;">Detalhes da Candidatura</h3>
+        const docRef = db.collection('applications').doc(appId);
+        docRef.get()
+          .then((docSnap) => {
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              // Formata o telefone para exibição
+              const formattedPhone = data.phone ? 
+                `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
+                'Não informado';
               
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div>
-                  <p><strong>ID:</strong> ${appId}</p>
-                  <p><strong>Nome:</strong> ${data.fullName}</p>
-                  <p><strong>Telefone:</strong> ${formattedPhone}</p>
-                  <p><strong>Idade:</strong> ${data.age}</p>
+              let details = `
+                <div style="max-width: 800px; padding: 20px;">
+                  <h3 style="color: var(--primary); margin-bottom: 20px;">Detalhes da Candidatura</h3>
+                  
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                      <p><strong>ID:</strong> ${appId}</p>
+                      <p><strong>Nome:</strong> ${data.fullName}</p>
+                      <p><strong>Telefone:</strong> ${formattedPhone}</p>
+                      <p><strong>Idade:</strong> ${data.age}</p>
+                    </div>
+                    <div>
+                      <p><strong>CPF:</strong> ${data.cpf}</p>
+                      <p><strong>RG:</strong> ${data.rg}</p>
+                      <p><strong>PIS:</strong> ${data.pis}</p>
+                      <p><strong>Data:</strong> ${new Date(data.submissionDate).toLocaleString()}</p>
+                    </div>
+                  </div>
+                  
+                  <h4 style="margin: 20px 0 10px; color: var(--primary);">Documentos</h4>
+                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div>
+                      <h5>Frente do RG</h5>
+                      <img src="${data.rgFrontPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.rgFrontPhoto}', 'Frente do RG')">
+                    </div>
+                    <div>
+                      <h5>Verso do RG</h5>
+                      <img src="${data.rgBackPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.rgBackPhoto}', 'Verso do RG')">
+                    </div>
+                    <div>
+                      <h5>CPF</h5>
+                      <img src="${data.cpfPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.cpfPhoto}', 'CPF')">
+                    </div>
+                    <div>
+                      <h5>Comprovante</h5>
+                      <img src="${data.proofOfResidencePhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.proofOfResidencePhoto}', 'Comprovante')">
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p><strong>CPF:</strong> ${data.cpf}</p>
-                  <p><strong>RG:</strong> ${data.rg}</p>
-                  <p><strong>PIS:</strong> ${data.pis}</p>
-                  <p><strong>Data:</strong> ${new Date(data.submissionDate).toLocaleString()}</p>
-                </div>
-              </div>
+              `;
               
-              <h4 style="margin: 20px 0 10px; color: var(--primary);">Documentos</h4>
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                <div>
-                  <h5>Frente do RG</h5>
-                  <img src="${data.rgFrontPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.rgFrontPhoto}', 'Frente do RG')">
+              // Cria um modal para mostrar os detalhes
+              const detailModal = document.createElement('div');
+              detailModal.className = 'modal';
+              detailModal.innerHTML = `
+                <div class="modal-content" style="max-width: 900px;">
+                  <div class="modal-header">
+                    <h3>Detalhes da Candidatura</h3>
+                    <span class="close-modal">&times;</span>
+                  </div>
+                  <div class="modal-body">
+                    ${details}
+                  </div>
                 </div>
-                <div>
-                  <h5>Verso do RG</h5>
-                  <img src="${data.rgBackPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.rgBackPhoto}', 'Verso do RG')">
-                </div>
-                <div>
-                  <h5>CPF</h5>
-                  <img src="${data.cpfPhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.cpfPhoto}', 'CPF')">
-                </div>
-                <div>
-                  <h5>Comprovante</h5>
-                  <img src="${data.proofOfResidencePhoto}" style="max-width:100%; cursor:pointer;" onclick="showModal('${data.proofOfResidencePhoto}', 'Comprovante')">
-                </div>
-              </div>
-            </div>
-          `;
-          
-          // Cria um modal para mostrar os detalhes
-          const detailModal = document.createElement('div');
-          detailModal.className = 'modal';
-          detailModal.innerHTML = `
-            <div class="modal-content" style="max-width: 900px;">
-              <div class="modal-header">
-                <h3>Detalhes da Candidatura</h3>
-                <span class="close-modal">&times;</span>
-              </div>
-              <div class="modal-body">
-                ${details}
-              </div>
-            </div>
-          `;
-          
-          document.body.appendChild(detailModal);
-          detailModal.style.display = 'block';
-          
-          // Adiciona evento para fechar o modal
-          detailModal.querySelector('.close-modal').addEventListener('click', () => {
-            detailModal.style.display = 'none';
-            setTimeout(() => detailModal.remove(), 300);
+              `;
+              
+              document.body.appendChild(detailModal);
+              detailModal.style.display = 'block';
+              
+              // Adiciona evento para fechar o modal
+              detailModal.querySelector('.close-modal').addEventListener('click', () => {
+                detailModal.style.display = 'none';
+                setTimeout(() => detailModal.remove(), 300);
+              });
+            } else {
+              alert('Candidatura não encontrada!');
+            }
+          })
+          .catch((error) => {
+            console.error('Erro ao buscar candidatura:', error);
+            alert('Erro ao carregar detalhes da candidatura!');
           });
-        } else {
-          alert('Candidatura não encontrada!');
-        }
       }
     });
   </script>
+
+  <!-- Adiciona os SDKs do Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </body>
 </html>
