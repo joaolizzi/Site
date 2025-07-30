@@ -7,12 +7,17 @@
   <style>
     :root {
       --primary: #3498db;
-      --secondary: #2980b9;
-      --success: #2ecc71;
+      --primary-hover: #2980b9;
+      --secondary: #2ecc71;
+      --secondary-hover: #27ae60;
       --danger: #e74c3c;
+      --danger-hover: #c0392b;
       --light: #ecf0f1;
       --dark: #2c3e50;
+      --dark-hover: #1a252f;
       --gray: #95a5a6;
+      --gray-light: #bdc3c7;
+      --transition: all 0.3s ease;
     }
     
     * {
@@ -39,6 +44,9 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 20px 0;
       margin-bottom: 30px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     
     .header-content {
@@ -58,6 +66,12 @@
       box-shadow: 0 2px 15px rgba(0,0,0,0.1);
       padding: 25px;
       margin-bottom: 30px;
+      transition: var(--transition);
+    }
+    
+    .card:hover {
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
     }
     
     /* Estilos do Chat */
@@ -74,6 +88,7 @@
       background-color: white;
       border-radius: 8px 8px 0 0;
       border: 1px solid #e0e0e0;
+      scroll-behavior: smooth;
     }
     
     .message {
@@ -82,6 +97,13 @@
       padding: 12px 16px;
       border-radius: 18px;
       line-height: 1.4;
+      transition: var(--transition);
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     
     .bot-message {
@@ -100,6 +122,12 @@
       color: white;
       border-bottom-right-radius: 4px;
       margin-left: auto;
+      animation: fadeInRight 0.3s ease;
+    }
+    
+    @keyframes fadeInRight {
+      from { opacity: 0; transform: translateX(10px); }
+      to { opacity: 1; transform: translateX(0); }
     }
     
     #chatInputArea {
@@ -121,6 +149,13 @@
       border: 1px solid #ddd;
       border-radius: 6px;
       font-size: 16px;
+      transition: var(--transition);
+    }
+    
+    .input-group input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+      outline: none;
     }
     
     .input-group button {
@@ -131,22 +166,62 @@
       padding: 0 20px;
       cursor: pointer;
       font-weight: 600;
-      transition: background 0.3s;
+      transition: var(--transition);
     }
     
     .input-group button:hover {
-      background-color: var(--secondary);
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    
+    .input-group button:active {
+      transform: translateY(0);
     }
     
     /* Estilos para upload de arquivos */
     .file-upload {
       margin-top: 10px;
+      position: relative;
     }
     
     .file-upload label {
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
+    }
+    
+    .file-upload input[type="file"] {
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+    }
+    
+    .file-upload label.file-label {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: var(--primary);
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      text-align: center;
+    }
+    
+    .file-upload label.file-label:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    
+    .file-upload label.file-label:active {
+      transform: translateY(0);
+    }
+    
+    .file-upload label.file-label i {
+      margin-right: 8px;
     }
     
     .file-preview-container {
@@ -161,6 +236,12 @@
       border: 1px solid #ddd;
       border-radius: 6px;
       overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    .file-preview:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     
     .file-preview img {
@@ -180,6 +261,30 @@
       padding: 5px;
       font-size: 12px;
       text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .file-upload-status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--gray);
+    }
+    
+    .progress-bar {
+      height: 5px;
+      background-color: #e0e0e0;
+      border-radius: 3px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background-color: var(--primary);
+      width: 0;
+      transition: width 0.3s ease;
     }
     
     /* Estilos da área admin */
@@ -206,6 +311,13 @@
       padding: 12px 15px;
       border: 1px solid #ddd;
       border-radius: 6px;
+      transition: var(--transition);
+    }
+    
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+      outline: none;
     }
     
     .search-button {
@@ -216,6 +328,16 @@
       padding: 0 20px;
       cursor: pointer;
       font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    .search-button:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    
+    .search-button:active {
+      transform: translateY(0);
     }
     
     #adminPassword {
@@ -223,6 +345,13 @@
       padding: 12px 15px;
       border: 1px solid #ddd;
       border-radius: 6px;
+      transition: var(--transition);
+    }
+    
+    #adminPassword:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+      outline: none;
     }
     
     #accessDataBtn {
@@ -233,11 +362,23 @@
       padding: 0 20px;
       cursor: pointer;
       font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    #accessDataBtn:hover {
+      background-color: var(--secondary-hover);
+      transform: translateY(-1px);
+    }
+    
+    #accessDataBtn:active {
+      transform: translateY(0);
     }
     
     /* Estilos da tabela */
     .table-responsive {
       overflow-x: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     
     table {
@@ -255,6 +396,12 @@
     th {
       background-color: var(--primary);
       color: white;
+      position: sticky;
+      top: 0;
+    }
+    
+    tr {
+      transition: var(--transition);
     }
     
     tr:hover {
@@ -266,6 +413,33 @@
       max-height: 100px;
       border: 1px solid #ddd;
       border-radius: 4px;
+      transition: var(--transition);
+    }
+    
+    .photo-cell img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .view-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    
+    .view-btn:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .view-btn:active {
+      transform: translateY(0);
     }
     
     /* Modal para visualização de fotos */
@@ -279,6 +453,12 @@
       height: 100%;
       background-color: rgba(0,0,0,0.8);
       overflow: auto;
+      animation: fadeInModal 0.3s ease;
+    }
+    
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     
     .modal-content {
@@ -290,6 +470,13 @@
       border-radius: 8px;
       max-width: 800px;
       max-height: 80vh;
+      box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+      animation: slideInModal 0.3s ease;
+    }
+    
+    @keyframes slideInModal {
+      from { transform: translateY(-20px); }
+      to { transform: translateY(0); }
     }
     
     .modal-header {
@@ -297,6 +484,8 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
     }
     
     .modal-body {
@@ -309,12 +498,20 @@
       height: auto;
       max-height: 60vh;
       object-fit: contain;
+      border-radius: 4px;
     }
     
     .close-modal {
       font-size: 24px;
       font-weight: bold;
       cursor: pointer;
+      color: var(--gray);
+      transition: var(--transition);
+    }
+    
+    .close-modal:hover {
+      color: var(--dark);
+      transform: rotate(90deg);
     }
     
     /* Responsividade */
@@ -349,6 +546,11 @@
       .input-group button {
         padding: 12px;
       }
+      
+      .modal-content {
+        margin: 10% auto;
+        width: 90%;
+      }
     }
     
     /* Estados */
@@ -374,6 +576,52 @@
       line-height: 24px;
       margin-right: 8px;
       font-weight: bold;
+    }
+    
+    /* Ícones */
+    .icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 5px;
+    }
+    
+    /* Notificações */
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      background-color: var(--success);
+      color: white;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+      display: flex;
+      align-items: center;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    .notification.error {
+      background-color: var(--danger);
+    }
+    
+    .notification.warning {
+      background-color: #f39c12;
+    }
+    
+    .notification i {
+      margin-right: 10px;
     }
   </style>
 </head>
@@ -452,7 +700,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, doc, getDoc, where, or } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     // Configuração do Firebase
@@ -493,6 +741,7 @@
 
       // Configurações
       const ADMIN_PASSWORD = 'mmgadmin';
+      const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
       let currentUserId = null;
       let currentQuestionIndex = 0;
       let collectedData = {};
@@ -513,6 +762,17 @@
       ];
 
       // Funções de UI
+      function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `<i>${type === 'error' ? '⚠️' : '✓'}</i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+
       function addBotMessage(text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message bot-message';
@@ -575,32 +835,56 @@
         inputGroup.className = 'input-group';
 
         if (type === 'file') {
-          const label = document.createElement('label');
-          label.setAttribute('for', id);
-          label.textContent = 'Selecione o arquivo:';
+          const fileUploadDiv = document.createElement('div');
+          fileUploadDiv.className = 'file-upload';
           
           const fileInput = document.createElement('input');
           fileInput.type = 'file';
           fileInput.id = id;
           fileInput.accept = 'image/*';
-          fileInput.className = 'file-upload';
+          
+          const fileLabel = document.createElement('label');
+          fileLabel.htmlFor = id;
+          fileLabel.className = 'file-label';
+          fileLabel.innerHTML = '📁 Selecione o arquivo';
           
           const previewContainer = document.createElement('div');
           previewContainer.className = 'file-preview-container';
           previewContainer.id = `${id}-preview`;
           
+          const statusDiv = document.createElement('div');
+          statusDiv.className = 'file-upload-status';
+          statusDiv.innerHTML = 'Tamanho máximo: 15MB';
+          
+          const progressBar = document.createElement('div');
+          progressBar.className = 'progress-bar hidden';
+          progressBar.innerHTML = '<div class="progress"></div>';
+          
           const sendButton = document.createElement('button');
-          sendButton.textContent = 'Enviar';
-          sendButton.addEventListener('click', () => handleFileUpload(id, fileInput));
+          sendButton.textContent = 'Enviar Arquivo';
+          sendButton.addEventListener('click', () => handleFileUpload(id, fileInput, progressBar));
 
-          inputGroup.appendChild(label);
-          inputGroup.appendChild(fileInput);
-          inputGroup.appendChild(previewContainer);
+          fileUploadDiv.appendChild(fileInput);
+          fileUploadDiv.appendChild(fileLabel);
+          fileUploadDiv.appendChild(previewContainer);
+          fileUploadDiv.appendChild(statusDiv);
+          fileUploadDiv.appendChild(progressBar);
+          
+          inputGroup.appendChild(fileUploadDiv);
           inputGroup.appendChild(sendButton);
 
           fileInput.addEventListener('change', (e) => {
             previewContainer.innerHTML = '';
             Array.from(e.target.files).forEach(file => {
+              if (file.size > MAX_FILE_SIZE) {
+                statusDiv.innerHTML = `❌ Arquivo muito grande (${(file.size / (1024 * 1024)).toFixed(2)}MB). O máximo é 15MB.`;
+                statusDiv.style.color = 'var(--danger)';
+                return;
+              } else {
+                statusDiv.innerHTML = `Arquivo selecionado: ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)}MB)`;
+                statusDiv.style.color = 'inherit';
+              }
+              
               const reader = new FileReader();
               reader.onload = (event) => {
                 const previewDiv = document.createElement('div');
@@ -611,7 +895,7 @@
                 
                 const fileName = document.createElement('div');
                 fileName.className = 'file-name';
-                fileName.textContent = file.name;
+                fileName.textContent = file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name;
                 
                 previewDiv.appendChild(img);
                 previewDiv.appendChild(fileName);
@@ -654,22 +938,25 @@
         chatInputArea.appendChild(inputGroup);
       }
 
-      async function handleFileUpload(id, input) {
+      async function handleFileUpload(id, input, progressBar) {
         const files = input.files;
         if (!files || files.length === 0) {
-          addBotMessage('Por favor, selecione pelo menos um arquivo.');
+          showNotification('Por favor, selecione pelo menos um arquivo.', 'error');
+          return;
+        }
+
+        const file = files[0];
+        
+        if (file.size > MAX_FILE_SIZE) {
+          showNotification(`Arquivo muito grande (${(file.size / (1024 * 1024)).toFixed(2)}MB). O máximo é 15MB.`, 'error');
           return;
         }
 
         loadingChat.classList.remove('hidden');
+        progressBar.classList.remove('hidden');
+        const progress = progressBar.querySelector('.progress');
+        
         try {
-          const file = files[0];
-          
-          if (file.size > 5 * 1024 * 1024) {
-            addBotMessage('❌ Arquivo muito grande. O tamanho máximo é 5MB.');
-            return;
-          }
-
           addBotMessage('⏳ Enviando arquivo...');
 
           const timestamp = Date.now();
@@ -677,19 +964,34 @@
           const fileName = `${id}_${timestamp}.${fileExtension}`;
           const fileRef = ref(storage, `applications/${currentUserId}/${fileName}`);
           
-          await uploadBytes(fileRef, file);
-          const downloadURL = await getDownloadURL(fileRef);
+          const uploadTask = uploadBytesResumable(fileRef, file);
           
-          collectedData[id] = downloadURL;
-          addUserMessage(`✅ Arquivo enviado: ${file.name}`);
-          input.value = '';
-          document.getElementById(`${id}-preview`).innerHTML = '';
-          currentQuestionIndex++;
-          displayQuestion();
+          uploadTask.on('state_changed',
+            (snapshot) => {
+              const progressValue = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              progress.style.width = `${progressValue}%`;
+            },
+            (error) => {
+              console.error('Erro no upload:', error);
+              showNotification('❌ Falha no envio. Tente novamente.', 'error');
+            },
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              
+              collectedData[id] = downloadURL;
+              addUserMessage(`✅ Arquivo enviado: ${file.name}`);
+              input.value = '';
+              document.getElementById(`${id}-preview`).innerHTML = '';
+              progressBar.classList.add('hidden');
+              currentQuestionIndex++;
+              displayQuestion();
+              showNotification('Arquivo enviado com sucesso!');
+            }
+          );
           
         } catch (error) {
           console.error('Erro no upload:', error);
-          addBotMessage('❌ Falha no envio. Tente novamente.');
+          showNotification('❌ Falha no envio. Tente novamente.', 'error');
         } finally {
           loadingChat.classList.add('hidden');
         }
@@ -701,13 +1003,13 @@
         if (id === 'phone') {
           value = value.replace(/\D/g, '');
           if (value.length < 10) {
-            addBotMessage('Por favor, digite um número de telefone válido com DDD.');
+            showNotification('Por favor, digite um número de telefone válido com DDD.', 'error');
             return;
           }
         }
         
         if (!value) {
-          addBotMessage('Por favor, preencha este campo.');
+          showNotification('Por favor, preencha este campo.', 'error');
           return;
         }
 
@@ -755,11 +1057,13 @@
           const docRef = await addDoc(collection(db, 'applications'), applicationData);
           
           addBotMessage(`✅ Candidatura #${docRef.id} enviada com sucesso!`);
+          showNotification('Candidatura enviada com sucesso!');
           resetForm();
           
         } catch (error) {
           console.error('Erro:', error);
           addBotMessage(`❌ Erro: ${error.message}`);
+          showNotification(`Erro: ${error.message}`, 'error');
           
           const retryBtn = document.createElement('button');
           retryBtn.textContent = 'Tentar Novamente';
@@ -790,7 +1094,7 @@
       function searchApplications() {
         const searchTerm = searchInput.value.trim();
         if (!searchTerm) {
-          alert('Por favor, digite um nome ou CPF para buscar.');
+          showNotification('Por favor, digite um nome ou CPF para buscar.', 'error');
           return;
         }
 
@@ -803,8 +1107,7 @@
             where('fullName', '>=', searchTerm),
             where('fullName', '<=', searchTerm + '\uf8ff'),
             where('cpf', '==', searchTerm.replace(/\D/g, ''))
-          )
-        );
+        ));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
           loadingData.classList.add('hidden');
@@ -816,17 +1119,20 @@
           }
 
           renderApplicationsTable(snapshot);
+          showNotification(`${snapshot.size} candidatura(s) encontrada(s).`);
         }, (error) => {
           console.error('Erro ao buscar candidaturas:', error);
           loadingData.classList.add('hidden');
           noDataMessage.classList.remove('hidden');
           noDataMessage.textContent = 'Erro ao buscar candidaturas.';
+          showNotification('Erro ao buscar candidaturas.', 'error');
         });
       }
 
       function resetSearchResults() {
         searchInput.value = '';
         loadApplications();
+        showNotification('Busca resetada.');
       }
 
       function loadApplications() {
@@ -847,11 +1153,13 @@
           }
 
           renderApplicationsTable(snapshot);
+          showNotification(`${snapshot.size} candidatura(s) carregada(s).`);
         }, (error) => {
           console.error('Erro ao carregar candidaturas:', error);
           loadingData.classList.add('hidden');
           noDataMessage.classList.remove('hidden');
           noDataMessage.textContent = 'Erro ao carregar candidaturas.';
+          showNotification('Erro ao carregar candidaturas.', 'error');
         });
       }
 
@@ -969,7 +1277,7 @@
             setTimeout(() => detailModal.remove(), 300);
           });
         } else {
-          alert('Candidatura não encontrada!');
+          showNotification('Candidatura não encontrada!', 'error');
         }
       }
 
@@ -980,13 +1288,15 @@
             loadingData.classList.remove('hidden');
             adminPanel.classList.remove('hidden');
             await loadApplications();
+            showNotification('Painel administrativo acessado com sucesso!');
           } catch (error) {
             console.error('Erro ao acessar painel admin:', error);
+            showNotification('Erro ao acessar painel administrativo.', 'error');
           } finally {
             loadingData.classList.add('hidden');
           }
         } else {
-          alert('Senha incorreta!');
+          showNotification('Senha incorreta!', 'error');
         }
       });
 
