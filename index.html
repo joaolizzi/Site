@@ -450,9 +450,27 @@
   </div>
 
   <script type="module">
-    import { db, auth } from './firebase-app.js';
-    import { collection, addDoc, onSnapshot, query, doc, getDoc, where, or } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, doc, getDoc, where, or } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBfADQYaRc8EQFppGQnVNpD6XBai50totE",
+      authDomain: "meuprojeto-257f0.firebaseapp.com",
+      projectId: "meuprojeto-257f0",
+      storageBucket: "meuprojeto-257f0.appspot.com",
+      messagingSenderId: "710773486236",
+      appId: "1:710773486236:web:e9529bab7f7ec7c80bf359",
+      measurementId: "G-05PKZ06N10"
+    };
+
+    // Inicialize o Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
 
     document.addEventListener('DOMContentLoaded', () => {
       // Elementos do DOM
@@ -480,7 +498,7 @@
       let collectedData = {};
       let applicationsSnapshot = [];
 
-      // Fluxo de perguntas (agora com telefone)
+      // Fluxo de perguntas
       const questions = [
         { id: 'fullName', text: 'Para começar, qual é o seu nome completo?', type: 'text' },
         { id: 'age', text: 'Qual é a sua idade?', type: 'number' },
@@ -494,14 +512,45 @@
         { id: 'rgBackPhoto', text: 'Por último, envie uma foto do verso do seu RG.', type: 'file' }
       ];
 
-      // Inicialização
-      initApplication();
+      // Funções de UI
+      function addBotMessage(text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message bot-message';
+        messageDiv.innerHTML = text;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addUserMessage(text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message user-message';
+        messageDiv.textContent = text;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function setupModal() {
+        closeModal.addEventListener('click', () => {
+          photoModal.style.display = 'none';
+        });
+
+        window.showModal = (imageSrc, title = 'Documento') => {
+          modalImage.src = imageSrc;
+          modalTitle.textContent = title;
+          photoModal.style.display = 'block';
+        };
+
+        window.onclick = (event) => {
+          if (event.target === photoModal) {
+            photoModal.style.display = 'none';
+          }
+        };
+      }
 
       // Funções principais
       function initApplication() {
         currentUserId = auth.currentUser?.uid || crypto.randomUUID();
-        // Adiciona mensagem de boas-vindas
-        addBotMessage('Olá! Vamos começar sua candidatura. Por favor, responda às seguintes perguntas:');
+        addBotMessage('Olá! Vamos começar seu cadastro. Por favor, responda às seguintes perguntas:');
         displayQuestion();
         setupModal();
         setupSearch();
@@ -510,7 +559,6 @@
       function displayQuestion() {
         if (currentQuestionIndex < questions.length) {
           const q = questions[currentQuestionIndex];
-          // Adiciona número da pergunta e texto em negrito
           const questionText = `<span class="question-number">${currentQuestionIndex + 1}</span> <strong>${q.text}</strong>`;
           addBotMessage(questionText);
           renderInput(q.id, q.type);
@@ -578,13 +626,11 @@
           input.id = id;
           input.placeholder = `Digite seu ${id.replace(/([A-Z])/g, ' $1').toLowerCase()}...`;
           
-          // Adiciona máscara para telefone se for o campo de phone
           if (id === 'phone') {
             input.addEventListener('input', function(e) {
               let value = e.target.value.replace(/\D/g, '');
               if (value.length > 11) value = value.substring(0, 11);
               
-              // Formatação: (XX) XXXXX-XXXX
               if (value.length > 0) {
                 value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7, 11)}`;
               }
@@ -618,15 +664,32 @@
         loadingChat.classList.remove('hidden');
         try {
           const file = files[0];
-          const base64 = await readFileAsBase64(file);
-          collectedData[id] = base64;
-          addUserMessage(`Arquivo enviado: ${file.name}`);
+          
+          if (file.size > 5 * 1024 * 1024) {
+            addBotMessage('❌ Arquivo muito grande. O tamanho máximo é 5MB.');
+            return;
+          }
+
+          addBotMessage('⏳ Enviando arquivo...');
+
+          const timestamp = Date.now();
+          const fileExtension = file.name.split('.').pop();
+          const fileName = `${id}_${timestamp}.${fileExtension}`;
+          const fileRef = ref(storage, `applications/${currentUserId}/${fileName}`);
+          
+          await uploadBytes(fileRef, file);
+          const downloadURL = await getDownloadURL(fileRef);
+          
+          collectedData[id] = downloadURL;
+          addUserMessage(`✅ Arquivo enviado: ${file.name}`);
           input.value = '';
+          document.getElementById(`${id}-preview`).innerHTML = '';
           currentQuestionIndex++;
           displayQuestion();
+          
         } catch (error) {
-          console.error('Erro ao processar arquivo:', error);
-          addBotMessage('Ocorreu um erro ao processar seu arquivo. Por favor, tente novamente.');
+          console.error('Erro no upload:', error);
+          addBotMessage('❌ Falha no envio. Tente novamente.');
         } finally {
           loadingChat.classList.add('hidden');
         }
@@ -635,7 +698,6 @@
       function handleTextInput(id, input) {
         let value = input.value.trim();
         
-        // Remove formatação do telefone antes de salvar
         if (id === 'phone') {
           value = value.replace(/\D/g, '');
           if (value.length < 10) {
@@ -657,7 +719,6 @@
       }
 
       function formatPhoneNumber(phone) {
-        // Formata o telefone para exibição: (XX) XXXXX-XXXX
         if (phone.length === 11) {
           return `(${phone.substring(0, 2)}) ${phone.substring(2, 7)}-${phone.substring(7, 11)}`;
         }
@@ -667,40 +728,45 @@
       async function submitApplication() {
         loadingChat.classList.remove('hidden');
         try {
-          // Verifica se todos os campos obrigatórios foram preenchidos
           const requiredFields = ['fullName', 'age', 'phone', 'cpf', 'rg', 'pis', 
                                 'proofOfResidencePhoto', 'cpfPhoto', 'rgFrontPhoto', 'rgBackPhoto'];
           const missingFields = requiredFields.filter(field => !collectedData[field]);
           
           if (missingFields.length > 0) {
-            throw new Error(`Faltam campos obrigatórios: ${missingFields.join(', ')}`);
+            throw new Error(`Por favor, complete todos os campos: ${missingFields.join(', ')}`);
           }
 
-          const docRef = await addDoc(collection(db, 'applications'), {
+          const applicationData = {
             userId: currentUserId,
-            ...collectedData,
+            fullName: collectedData.fullName,
+            age: collectedData.age,
+            phone: collectedData.phone.replace(/\D/g, ''),
+            cpf: collectedData.cpf.replace(/\D/g, ''),
+            rg: collectedData.rg.replace(/\D/g, ''),
+            pis: collectedData.pis.replace(/\D/g, ''),
+            proofOfResidencePhoto: collectedData.proofOfResidencePhoto,
+            cpfPhoto: collectedData.cpfPhoto,
+            rgFrontPhoto: collectedData.rgFrontPhoto,
+            rgBackPhoto: collectedData.rgBackPhoto,
             submissionDate: new Date().toISOString(),
             status: 'pending'
-          });
+          };
+
+          const docRef = await addDoc(collection(db, 'applications'), applicationData);
           
-          addBotMessage(`✅ Candidatura enviada com sucesso! Seu ID é: ${docRef.id}`);
+          addBotMessage(`✅ Candidatura #${docRef.id} enviada com sucesso!`);
           resetForm();
+          
         } catch (error) {
-          console.error('Erro ao enviar candidatura:', error);
+          console.error('Erro:', error);
+          addBotMessage(`❌ Erro: ${error.message}`);
           
-          // Tratamento específico para erro de permissão
-          if (error.message.includes('permission')) {
-            addBotMessage('❌ Erro: Sem permissão para enviar. Verifique sua conexão e tente novamente.');
-          } else {
-            addBotMessage(`❌ Erro ao enviar candidatura: ${error.message}`);
-          }
-          
-          // Permite tentar novamente
-          const retryButton = document.createElement('button');
-          retryButton.textContent = 'Tentar Novamente';
-          retryButton.style.marginTop = '10px';
-          retryButton.addEventListener('click', submitApplication);
-          chatInputArea.appendChild(retryButton);
+          const retryBtn = document.createElement('button');
+          retryBtn.textContent = 'Tentar Novamente';
+          retryBtn.style.marginTop = '10px';
+          retryBtn.addEventListener('click', submitApplication);
+          chatInputArea.innerHTML = '';
+          chatInputArea.appendChild(retryBtn);
         } finally {
           loadingChat.classList.add('hidden');
         }
@@ -712,42 +778,7 @@
         setTimeout(() => displayQuestion(), 3000);
       }
 
-      // Funções de UI
-      function addBotMessage(text) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message bot-message';
-        messageDiv.innerHTML = text; // Usamos innerHTML para permitir formatação
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-
-      function addUserMessage(text) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message user-message';
-        messageDiv.textContent = text;
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-
-      function readFileAsBase64(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = error => reject(error);
-          reader.readAsDataURL(file);
-        });
-      }
-
       // Funções do Admin
-      accessDataBtn.addEventListener('click', () => {
-        if (adminPasswordInput.value === ADMIN_PASSWORD) {
-          adminPanel.classList.remove('hidden');
-          loadApplications();
-        } else {
-          alert('Senha incorreta!');
-        }
-      });
-
       function setupSearch() {
         searchButton.addEventListener('click', searchApplications);
         resetSearch.addEventListener('click', resetSearchResults);
@@ -766,7 +797,6 @@
         loadingData.classList.remove('hidden');
         applicationsTableBody.innerHTML = '';
 
-        // Busca por nome (contendo o termo) ou CPF (igual ao termo)
         const q = query(
           collection(db, 'applications'),
           or(
@@ -808,7 +838,7 @@
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
           loadingData.classList.add('hidden');
-          applicationsSnapshot = snapshot; // Armazena o snapshot para uso posterior
+          applicationsSnapshot = snapshot;
           
           if (snapshot.empty) {
             noDataMessage.classList.remove('hidden');
@@ -833,7 +863,6 @@
           const data = doc.data();
           const row = document.createElement('tr');
           
-          // Formata o telefone para exibição
           const formattedPhone = data.phone ? 
             `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
             'N/A';
@@ -857,7 +886,6 @@
           applicationsTableBody.appendChild(row);
         });
 
-        // Adiciona eventos aos botões
         document.querySelectorAll('.view-btn').forEach(btn => {
           btn.addEventListener('click', () => viewApplicationDetails(btn.dataset.id));
         });
@@ -868,31 +896,12 @@
         return `<img src="${photoData}" alt="Documento" class="document-thumbnail" style="cursor:pointer;" onclick="showModal('${photoData}')">`;
       }
 
-      function setupModal() {
-        closeModal.addEventListener('click', () => {
-          photoModal.style.display = 'none';
-        });
-
-        window.showModal = (imageSrc, title = 'Documento') => {
-          modalImage.src = imageSrc;
-          modalTitle.textContent = title;
-          photoModal.style.display = 'block';
-        };
-
-        window.onclick = (event) => {
-          if (event.target === photoModal) {
-            photoModal.style.display = 'none';
-          }
-        };
-      }
-
       async function viewApplicationDetails(appId) {
         const docRef = doc(db, 'applications', appId);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
           const data = docSnap.data();
-          // Formata o telefone para exibição
           const formattedPhone = data.phone ? 
             `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
             'Não informado';
@@ -938,7 +947,6 @@
             </div>
           `;
           
-          // Cria um modal para mostrar os detalhes
           const detailModal = document.createElement('div');
           detailModal.className = 'modal';
           detailModal.innerHTML = `
@@ -956,7 +964,6 @@
           document.body.appendChild(detailModal);
           detailModal.style.display = 'block';
           
-          // Adiciona evento para fechar o modal
           detailModal.querySelector('.close-modal').addEventListener('click', () => {
             detailModal.style.display = 'none';
             setTimeout(() => detailModal.remove(), 300);
@@ -965,6 +972,25 @@
           alert('Candidatura não encontrada!');
         }
       }
+
+      // Inicialização
+      accessDataBtn.addEventListener('click', async () => {
+        if (adminPasswordInput.value === ADMIN_PASSWORD) {
+          try {
+            loadingData.classList.remove('hidden');
+            adminPanel.classList.remove('hidden');
+            await loadApplications();
+          } catch (error) {
+            console.error('Erro ao acessar painel admin:', error);
+          } finally {
+            loadingData.classList.add('hidden');
+          }
+        } else {
+          alert('Senha incorreta!');
+        }
+      });
+
+      initApplication();
     });
   </script>
 </body>
