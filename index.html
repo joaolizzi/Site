@@ -709,7 +709,7 @@
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    // Configuração do Firebase
+    // minha api
     const firebaseConfig = {
       apiKey: "AIzaSyBfADQYaRc8EQFppGQnVNpD6XBai50totE",
       authDomain: "meuprojeto-257f0.firebaseapp.com",
@@ -720,7 +720,7 @@
       measurementId: "G-05PKZ06N10"
     };
 
-    // Inicialize o Firebase
+    // Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
@@ -753,7 +753,7 @@
       let collectedData = {};
       let applicationsSnapshot = [];
 
-      // Fluxo de perguntas
+      // perguntas
       const questions = [
         { id: 'fullName', text: 'Para começar, qual é o seu nome completo?', type: 'text' },
         { id: 'age', text: 'Qual é a sua idade?', type: 'number' },
