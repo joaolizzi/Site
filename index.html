@@ -877,12 +877,13 @@
 
       // Configurações
       const ADMIN_PASSWORD = 'mmgadmin';
+      const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
       let currentUserId = null;
       let currentQuestionIndex = 0;
       let collectedData = {};
       let applicationsSnapshot = [];
 
-      // Fluxo de perguntas (agora com telefone)
+      // Fluxo de perguntas
       const questions = [
         { id: 'fullName', text: 'Para começar, qual é o seu nome completo?', type: 'text' },
         { id: 'age', text: 'Qual é a sua idade?', type: 'number' },
@@ -902,7 +903,6 @@
       // Funções principais
       function initApplication() {
         currentUserId = auth.currentUser?.uid || crypto.randomUUID();
-        // Adiciona mensagem de boas-vindas
         addBotMessage('Olá! Bem-vindo ao processo de candidatura MMG. Vamos começar preenchendo algumas informações importantes:');
         updateProgressBar();
         displayQuestion();
@@ -913,7 +913,6 @@
       function displayQuestion() {
         if (currentQuestionIndex < questions.length) {
           const q = questions[currentQuestionIndex];
-          // Adiciona número da pergunta e texto em negrito
           const questionText = `<span class="question-number">${currentQuestionIndex + 1}</span> <strong>${q.text}</strong>`;
           addBotMessage(questionText);
           renderInput(q.id, q.type);
@@ -946,7 +945,7 @@
               <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
             </svg>
             <div>Clique para selecionar ou arraste o arquivo</div>
-            <small>Tamanho máximo: 5MB</small>
+            <small>Tamanho máximo: 15MB</small>
           `;
           
           const fileInput = document.createElement('input');
@@ -973,8 +972,13 @@
           fileInput.addEventListener('change', (e) => {
             previewContainer.innerHTML = '';
             Array.from(e.target.files).forEach(file => {
-              if (file.size > 5 * 1024 * 1024) {
-                showNotification('Arquivo muito grande. O tamanho máximo é 5MB.', 'error');
+              if (file.size > MAX_FILE_SIZE) {
+                showNotification('Arquivo muito grande. O tamanho máximo é 15MB.', 'error');
+                return;
+              }
+              
+              if (!file.type.match('image.*')) {
+                showNotification('Por favor, selecione apenas imagens.', 'error');
                 return;
               }
               
@@ -1004,6 +1008,9 @@
                 previewDiv.appendChild(removeBtn);
                 previewContainer.appendChild(previewDiv);
               };
+              reader.onerror = () => {
+                showNotification('Erro ao ler o arquivo. Tente novamente.', 'error');
+              };
               reader.readAsDataURL(file);
             });
           });
@@ -1011,19 +1018,19 @@
           // Drag and drop
           fileInputLabel.addEventListener('dragover', (e) => {
             e.preventDefault();
-            fileInputLabel.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--primary');
+            fileInputLabel.style.borderColor = 'var(--primary)';
             fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
           });
           
           fileInputLabel.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            fileInputLabel.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--light-gray');
+            fileInputLabel.style.borderColor = 'var(--light-gray)';
             fileInputLabel.style.backgroundColor = 'transparent';
           });
           
           fileInputLabel.addEventListener('drop', (e) => {
             e.preventDefault();
-            fileInputLabel.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--light-gray');
+            fileInputLabel.style.borderColor = 'var(--light-gray)';
             fileInputLabel.style.backgroundColor = 'transparent';
             
             if (e.dataTransfer.files.length) {
@@ -1038,13 +1045,12 @@
           input.id = id;
           input.placeholder = `Digite seu ${id.replace(/([A-Z])/g, ' $1').toLowerCase()}...`;
           
-          // Adiciona máscara para telefone se for o campo de phone
+          // Adiciona máscara para telefone
           if (id === 'phone') {
             input.addEventListener('input', function(e) {
               let value = e.target.value.replace(/\D/g, '');
               if (value.length > 11) value = value.substring(0, 11);
               
-              // Formatação: (XX) XXXXX-XXXX
               if (value.length > 0) {
                 value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7, 11)}`;
               }
@@ -1059,7 +1065,6 @@
               let value = e.target.value.replace(/\D/g, '');
               if (value.length > 11) value = value.substring(0, 11);
               
-              // Formatação: XXX.XXX.XXX-XX
               if (value.length > 0) {
                 value = value.replace(/(\d{3})(\d)/, '$1.$2');
                 value = value.replace(/(\d{3})(\d)/, '$1.$2');
@@ -1088,23 +1093,36 @@
       async function handleFileUpload(id, input) {
         const files = input.files;
         if (!files || files.length === 0) {
-          addBotMessage('Por favor, selecione pelo menos um arquivo.');
+          showNotification('Por favor, selecione pelo menos um arquivo.', 'error');
           return;
         }
 
         loadingChat.classList.remove('hidden');
         try {
           const file = files[0];
+          
+          // Verificação adicional do tamanho
+          if (file.size > MAX_FILE_SIZE) {
+            throw new Error('O arquivo é muito grande. O tamanho máximo é 15MB.');
+          }
+          
+          // Verificação do tipo de arquivo
+          if (!file.type.match('image.*')) {
+            throw new Error('Por favor, envie apenas imagens.');
+          }
+
           const base64 = await readFileAsBase64(file);
           collectedData[id] = base64;
           addUserMessage(`Arquivo enviado: ${file.name}`);
           input.value = '';
+          document.getElementById(`${id}-preview`).innerHTML = '';
           currentQuestionIndex++;
           updateProgressBar();
           displayQuestion();
+          showNotification('Arquivo enviado com sucesso!', 'success');
         } catch (error) {
           console.error('Erro ao processar arquivo:', error);
-          showNotification('Erro ao processar arquivo. Tente novamente.', 'error');
+          showNotification(error.message || 'Erro ao processar arquivo. Tente novamente.', 'error');
         } finally {
           loadingChat.classList.add('hidden');
         }
@@ -1145,7 +1163,6 @@
       }
 
       function formatPhoneNumber(phone) {
-        // Formata o telefone para exibição: (XX) XXXXX-XXXX
         if (phone.length === 11) {
           return `(${phone.substring(0, 2)}) ${phone.substring(2, 7)}-${phone.substring(7, 11)}`;
         }
@@ -1153,7 +1170,6 @@
       }
       
       function formatCPF(cpf) {
-        // Formata o CPF para exibição: XXX.XXX.XXX-XX
         if (cpf.length === 11) {
           return `${cpf.substring(0, 3)}.${cpf.substring(3, 6)}.${cpf.substring(6, 9)}-${cpf.substring(9, 11)}`;
         }
@@ -1185,7 +1201,6 @@
         } catch (error) {
           console.error('Erro ao enviar candidatura:', error);
           
-          // Tratamento específico para erro de permissão
           if (error.message.includes('permission')) {
             addBotMessage('❌ <strong>Erro:</strong> Sem permissão para enviar. Verifique sua conexão e tente novamente.');
             showNotification('Erro de conexão. Verifique sua internet.', 'error');
@@ -1194,7 +1209,6 @@
             showNotification('Erro ao enviar candidatura.', 'error');
           }
           
-          // Permite tentar novamente
           const retryButton = document.createElement('button');
           retryButton.textContent = 'Tentar Novamente';
           retryButton.className = 'btn btn-primary';
@@ -1217,7 +1231,7 @@
       function addBotMessage(text) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message bot-message';
-        messageDiv.innerHTML = text; // Usamos innerHTML para permitir formatação
+        messageDiv.innerHTML = text;
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
@@ -1287,7 +1301,6 @@
         loadingData.classList.remove('hidden');
         applicationsTableBody.innerHTML = '';
 
-        // Busca por nome (contendo o termo) ou CPF (igual ao termo)
         const q = query(
           collection(db, 'applications'),
           or(
@@ -1331,7 +1344,7 @@
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
           loadingData.classList.add('hidden');
-          applicationsSnapshot = snapshot; // Armazena o snapshot para uso posterior
+          applicationsSnapshot = snapshot;
           
           if (snapshot.empty) {
             noDataMessage.classList.remove('hidden');
@@ -1357,12 +1370,10 @@
           const data = doc.data();
           const row = document.createElement('tr');
           
-          // Formata o telefone para exibição
           const formattedPhone = data.phone ? 
             `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
             'N/A';
           
-          // Cria avatar com iniciais do nome
           let initials = 'NN';
           if (data.fullName) {
             const names = data.fullName.split(' ');
@@ -1402,7 +1413,6 @@
           applicationsTableBody.appendChild(row);
         });
 
-        // Adiciona eventos aos botões
         document.querySelectorAll('.view-btn').forEach(btn => {
           btn.addEventListener('click', () => viewApplicationDetails(btn.dataset.id));
         });
@@ -1414,7 +1424,6 @@
         
         if (docSnap.exists()) {
           const data = docSnap.data();
-          // Formata o telefone para exibição
           const formattedPhone = data.phone ? 
             `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
             'Não informado';
@@ -1460,7 +1469,6 @@
             </div>
           `;
           
-          // Cria um modal para mostrar os detalhes
           const detailModal = document.createElement('div');
           detailModal.className = 'modal';
           detailModal.innerHTML = `
@@ -1478,7 +1486,6 @@
           document.body.appendChild(detailModal);
           detailModal.style.display = 'block';
           
-          // Adiciona evento para fechar o modal
           detailModal.querySelector('.close-modal').addEventListener('click', () => {
             detailModal.style.display = 'none';
             setTimeout(() => detailModal.remove(), 300);
@@ -1488,7 +1495,6 @@
         }
       }
       
-      // Configura o modal global para visualização de imagens
       function setupModal() {
         closeModal.addEventListener('click', () => {
           photoModal.style.display = 'none';
