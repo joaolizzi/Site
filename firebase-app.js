@@ -5,16 +5,16 @@ import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/1
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 const storage = getStorage();
-const fileRef = ref(storage, "applications/ff9df163-a8b5-4725-8e28-7e3648b024d8/proofOfResidencePhoto_1755105358657.jpeg");
+const filePath = "applications/74d2b3b0-a07f-44e4-92d2-950397a7b0a7/proofOfResidencePhoto_1755105924987.jpeg";
+const fileRef = ref(storage, filePath);
 
 getDownloadURL(fileRef)
   .then((url) => {
     console.log("URL pública:", url);
-    // usar no <img src="url">
     document.querySelector("#foto").src = url;
   })
   .catch((error) => {
-    console.error("Erro ao pegar URL", error);
+    console.error("Erro ao pegar URL:", error);
   });
 const firebaseConfig = {
   apiKey: "AIzaSyBfADQYaRc8EQFppGQnVNpD6XBai50totE",
