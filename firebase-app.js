@@ -1,6 +1,8 @@
 // firebase-config.js
+
+// Importa Firebase (usando CDN)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -13,12 +15,19 @@ const firebaseConfig = {
   measurementId: "G-05PKZ06N10"
 };
 
+// Inicializa o app
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
 
+// Autenticação anônima
+const auth = getAuth(app);
 signInAnonymously(auth).catch((error) => {
   console.error("Erro na autenticação anônima:", error);
+});
+
+// 🔹 Inicializa Firestore com long polling
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true, // força long polling
+  useFetchStreams: false               // evita streaming via fetch
 });
 
 export { db, auth };
