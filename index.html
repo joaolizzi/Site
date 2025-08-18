@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,34 +19,34 @@
       --gray: #6c757d;
       --light-gray: #e9ecef;
       --white: #ffffff;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-      --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
-      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1), 0 5px 10px rgba(0, 0, 0, 0.05);
       --radius-sm: 6px;
       --radius-md: 10px;
       --radius-lg: 14px;
       --transition: all 0.3s ease;
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    
+
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f5f7ff;
       color: var(--dark);
       line-height: 1.6;
     }
-    
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
-    
+
     header {
       background-color: var(--white);
       box-shadow: var(--shadow-sm);
@@ -54,19 +55,19 @@
       top: 0;
       z-index: 100;
     }
-    
+
     .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    
+
     .logo {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    
+
     .logo-icon {
       width: 32px;
       height: 32px;
@@ -78,26 +79,26 @@
       color: white;
       font-weight: bold;
     }
-    
+
     h1 {
       font-size: 1.5rem;
       font-weight: 600;
       color: var(--primary);
     }
-    
+
     h2 {
       font-size: 1.3rem;
       font-weight: 600;
       color: var(--dark);
       margin-bottom: 1.5rem;
     }
-    
+
     h3 {
       font-size: 1.1rem;
       font-weight: 500;
       color: var(--dark);
     }
-    
+
     .card {
       background-color: var(--white);
       border-radius: var(--radius-md);
@@ -106,11 +107,11 @@
       margin-bottom: 30px;
       transition: var(--transition);
     }
-    
+
     .card:hover {
       box-shadow: var(--shadow-md);
     }
-    
+
     /* Estilos do Chat */
     #chatContainer {
       display: flex;
@@ -121,7 +122,7 @@
       background-color: var(--white);
       box-shadow: var(--shadow-sm);
     }
-    
+
     #chatMessages {
       flex: 1;
       overflow-y: auto;
@@ -130,20 +131,20 @@
       scrollbar-width: thin;
       scrollbar-color: var(--light-gray) var(--white);
     }
-    
+
     #chatMessages::-webkit-scrollbar {
       width: 6px;
     }
-    
+
     #chatMessages::-webkit-scrollbar-track {
       background: var(--white);
     }
-    
+
     #chatMessages::-webkit-scrollbar-thumb {
       background-color: var(--light-gray);
       border-radius: 3px;
     }
-    
+
     .message {
       margin-bottom: 15px;
       max-width: 80%;
@@ -153,42 +154,49 @@
       position: relative;
       animation: fadeIn 0.3s ease;
     }
-    
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    
+
     .bot-message {
       background-color: var(--light);
       border-bottom-left-radius: var(--radius-sm);
       margin-right: auto;
       border: 1px solid var(--light-gray);
     }
-    
+
     .bot-message strong {
       font-weight: 600;
       color: var(--dark);
     }
-    
+
     .user-message {
       background-color: var(--primary);
       color: var(--white);
       border-bottom-right-radius: var(--radius-sm);
       margin-left: auto;
     }
-    
+
     #chatInputArea {
       padding: 15px;
       background-color: var(--light);
       border-top: 1px solid var(--light-gray);
     }
-    
+
     .input-group {
       display: flex;
       gap: 10px;
     }
-    
+
     .input-group input {
       flex: 1;
       padding: 12px 15px;
@@ -197,13 +205,13 @@
       font-size: 16px;
       transition: var(--transition);
     }
-    
+
     .input-group input:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
     }
-    
+
     .input-group button {
       background-color: var(--primary);
       color: var(--white);
@@ -217,34 +225,34 @@
       align-items: center;
       gap: 5px;
     }
-    
+
     .input-group button:hover {
       background-color: var(--primary-dark);
       transform: translateY(-1px);
     }
-    
+
     .input-group button:active {
       transform: translateY(0);
     }
-    
+
     /* Estilos para upload de arquivos */
     .file-upload {
       margin-top: 10px;
       width: 100%;
     }
-    
+
     .file-upload label {
       display: block;
       margin-bottom: 8px;
       font-weight: 500;
       color: var(--dark);
     }
-    
+
     .file-input-container {
       position: relative;
       width: 100%;
     }
-    
+
     .file-input-label {
       display: block;
       padding: 12px;
@@ -254,12 +262,12 @@
       cursor: pointer;
       transition: var(--transition);
     }
-    
+
     .file-input-label:hover {
       border-color: var(--primary);
       background-color: rgba(67, 97, 238, 0.05);
     }
-    
+
     .file-input {
       position: absolute;
       width: 0.1px;
@@ -268,14 +276,14 @@
       overflow: hidden;
       z-index: -1;
     }
-    
+
     .file-preview-container {
       display: flex;
       flex-wrap: wrap;
       gap: 15px;
       margin-top: 15px;
     }
-    
+
     .file-preview {
       position: relative;
       border: 1px solid var(--light-gray);
@@ -287,14 +295,14 @@
       display: flex;
       flex-direction: column;
     }
-    
+
     .file-preview img {
       display: block;
       width: 100%;
       height: 100px;
       object-fit: cover;
     }
-    
+
     .file-name {
       padding: 4px;
       font-size: 11px;
@@ -302,16 +310,16 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      background-color: rgba(0,0,0,0.05);
+      background-color: rgba(0, 0, 0, 0.05);
     }
-    
+
     .file-size {
       font-size: 10px;
       text-align: center;
       color: var(--gray);
       padding: 2px;
     }
-    
+
     .file-remove {
       position: absolute;
       top: 5px;
@@ -329,29 +337,29 @@
       opacity: 0;
       transition: var(--transition);
     }
-    
+
     .file-preview:hover .file-remove {
       opacity: 1;
     }
-    
+
     /* Estilos da área admin */
     .admin-section {
       margin-top: 40px;
     }
-    
+
     .admin-controls {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
     }
-    
+
     .admin-tools {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 20px;
     }
-    
+
     .search-input {
       flex: 1;
       min-width: 250px;
@@ -360,13 +368,13 @@
       border-radius: var(--radius-sm);
       transition: var(--transition);
     }
-    
+
     .search-input:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
     }
-    
+
     .search-button {
       background-color: var(--primary);
       color: var(--white);
@@ -377,11 +385,11 @@
       font-weight: 500;
       transition: var(--transition);
     }
-    
+
     .search-button:hover {
       background-color: var(--primary-dark);
     }
-    
+
     #adminPassword {
       flex: 1;
       padding: 12px 15px;
@@ -389,13 +397,13 @@
       border-radius: var(--radius-sm);
       transition: var(--transition);
     }
-    
+
     #adminPassword:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
     }
-    
+
     #accessDataBtn {
       background-color: var(--success);
       color: var(--white);
@@ -406,31 +414,32 @@
       font-weight: 500;
       transition: var(--transition);
     }
-    
+
     #accessDataBtn:hover {
       background-color: #3ab5d9;
     }
-    
+
     /* Estilos da tabela */
     .table-responsive {
       overflow-x: auto;
       border-radius: var(--radius-sm);
       box-shadow: var(--shadow-sm);
     }
-    
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
       background-color: var(--white);
     }
-    
-    th, td {
+
+    th,
+    td {
       padding: 12px 15px;
       text-align: left;
       border-bottom: 1px solid var(--light-gray);
     }
-    
+
     th {
       background-color: var(--primary);
       color: var(--white);
@@ -438,11 +447,11 @@
       position: sticky;
       top: 0;
     }
-    
+
     tr:hover {
       background-color: rgba(67, 97, 238, 0.05);
     }
-    
+
     .photo-cell img {
       width: 60px;
       height: 60px;
@@ -452,11 +461,11 @@
       cursor: pointer;
       transition: var(--transition);
     }
-    
+
     .photo-cell img:hover {
       transform: scale(1.05);
     }
-    
+
     /* Botões */
     .btn {
       padding: 8px 15px;
@@ -469,21 +478,21 @@
       align-items: center;
       gap: 5px;
     }
-    
+
     .btn-primary {
       background-color: var(--primary);
       color: var(--white);
     }
-    
+
     .btn-primary:hover {
       background-color: var(--primary-dark);
     }
-    
+
     .btn-sm {
       padding: 6px 12px;
       font-size: 13px;
     }
-    
+
     /* Modal para visualização de fotos */
     .modal {
       display: none;
@@ -493,11 +502,11 @@
       top: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0,0,0,0.8);
+      background-color: rgba(0, 0, 0, 0.8);
       overflow: auto;
       animation: fadeIn 0.3s ease;
     }
-    
+
     .modal-content {
       display: flex;
       flex-direction: column;
@@ -510,12 +519,19 @@
       box-shadow: var(--shadow-lg);
       animation: slideIn 0.3s ease;
     }
-    
+
     @keyframes slideIn {
-      from { transform: translateY(-20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
-    
+
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -524,13 +540,13 @@
       padding-bottom: 10px;
       border-bottom: 1px solid var(--light-gray);
     }
-    
+
     .modal-body {
       flex: 1;
       overflow-y: auto;
       padding: 10px 0;
     }
-    
+
     .modal-body img {
       width: 100%;
       height: auto;
@@ -538,7 +554,7 @@
       object-fit: contain;
       border-radius: var(--radius-sm);
     }
-    
+
     .close-modal {
       font-size: 24px;
       font-weight: bold;
@@ -546,11 +562,11 @@
       cursor: pointer;
       transition: var(--transition);
     }
-    
+
     .close-modal:hover {
       color: var(--danger);
     }
-    
+
     /* Status e badges */
     .badge {
       display: inline-block;
@@ -559,79 +575,80 @@
       font-size: 12px;
       font-weight: 500;
     }
-    
+
     .badge-success {
       background-color: rgba(76, 201, 240, 0.2);
       color: #189ab4;
     }
-    
+
     .badge-warning {
       background-color: rgba(248, 150, 30, 0.2);
       color: #f3722c;
     }
-    
+
     .badge-danger {
       background-color: rgba(247, 37, 133, 0.2);
       color: #f72585;
     }
-    
+
     /* Responsividade */
     @media (max-width: 768px) {
       .header-content {
         flex-direction: column;
         gap: 15px;
       }
-      
+
       .input-group {
         flex-direction: column;
       }
-      
+
       .message {
         max-width: 90%;
       }
-      
+
       .admin-tools {
         flex-direction: column;
       }
-      
+
       /* Ajustes específicos para mobile */
       #chatContainer {
         height: 70vh;
       }
-      
+
       .file-preview {
         width: 100px;
         height: 120px;
       }
-      
+
       .file-preview img {
         height: 80px;
       }
-      
+
       .input-group button {
         padding: 12px;
       }
-      
+
       table {
         font-size: 14px;
       }
-      
-      th, td {
+
+      th,
+      td {
         padding: 8px 10px;
       }
     }
-    
+
     /* Estados */
     .hidden {
       display: none;
     }
-    
+
     .loading {
       text-align: center;
       padding: 20px;
       color: var(--gray);
     }
-    
+
     .loading-spinner {
       border: 3px solid var(--light-gray);
       border-top: 3px solid var(--primary);
@@ -641,12 +658,17 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 10px;
     }
-    
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
-    
+
     /* Estilo para as perguntas enumeradas */
     .question-number {
       display: inline-flex;
@@ -661,7 +683,7 @@
       font-weight: 600;
       font-size: 14px;
     }
-    
+
     /* Progresso da entrevista */
     .progress-container {
       width: 100%;
@@ -670,20 +692,20 @@
       margin-bottom: 20px;
       height: 8px;
     }
-    
+
     .progress-bar {
       height: 100%;
       border-radius: 10px;
       background-color: var(--primary);
       transition: width 0.3s ease;
     }
-    
+
     /* Tooltip */
     .tooltip {
       position: relative;
       display: inline-block;
     }
-    
+
     .tooltip .tooltiptext {
       visibility: hidden;
       width: 120px;
@@ -701,12 +723,12 @@
       transition: opacity 0.3s;
       font-size: 12px;
     }
-    
+
     .tooltip:hover .tooltiptext {
       visibility: visible;
       opacity: 1;
     }
-    
+
     /* Notificações */
     .notification {
       position: fixed;
@@ -722,29 +744,36 @@
       align-items: center;
       gap: 10px;
     }
-    
+
     @keyframes slideInRight {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
-    
+
     .notification-success {
       background-color: var(--success);
     }
-    
+
     .notification-error {
       background-color: var(--danger);
     }
-    
+
     .notification-warning {
       background-color: var(--warning);
     }
-    
+
     .notification-close {
       cursor: pointer;
       font-weight: bold;
     }
-    
+
     /* Avatar placeholder */
     .avatar {
       width: 40px;
@@ -759,6 +788,7 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <div class="container header-content">
@@ -770,7 +800,8 @@
         <input id="adminPassword" type="password" placeholder="Senha de administrador">
         <button id="accessDataBtn">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+            <path
+              d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
           </svg>
           Acessar
         </button>
@@ -803,14 +834,16 @@
             <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nome ou CPF...">
             <button id="searchButton" class="search-button">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                <path
+                  d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
               </svg>
               Buscar
             </button>
             <button id="resetSearch" class="search-button">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
+                <path
+                  d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" />
               </svg>
               Limpar
             </button>
@@ -855,11 +888,7 @@
     </div>
   </div>
 
-  <script type="module">
-    import { db, auth } from './firebase-app.js';
-    import { collection, addDoc, onSnapshot, query, doc, getDoc, where, or } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
       // Elementos do DOM
       const chatMessages = document.getElementById('chatMessages');
@@ -882,15 +911,15 @@
 
       // Configurações
       const ADMIN_PASSWORD = 'mmgadmin';
-      const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
       const MAX_IMAGE_WIDTH = 800;
       const MAX_IMAGE_HEIGHT = 800;
       const IMAGE_QUALITY = 0.7;
-      
+
       let currentUserId = null;
       let currentQuestionIndex = 0;
       let collectedData = {};
-      let applicationsSnapshot = [];
+      let applicationsData = [];
 
       // Fluxo de perguntas
       const questions = [
@@ -911,7 +940,7 @@
 
       // Funções principais
       function initApplication() {
-        currentUserId = auth.currentUser?.uid || crypto.randomUUID();
+        currentUserId = crypto.randomUUID();
         addBotMessage('Olá! Bem-vindo ao processo de candidatura MMG. Vamos começar preenchendo algumas informações importantes:');
         updateProgressBar();
         displayQuestion();
@@ -936,176 +965,184 @@
         const progress = (currentQuestionIndex / questions.length) * 100;
         progressBar.style.width = `${progress}%`;
       }
-// ...substitua toda a função renderInput por esta versão...
-function renderInput(id, type) {
-  chatInputArea.innerHTML = '';
-  const inputGroup = document.createElement('div');
-  inputGroup.className = 'input-group';
 
-  if (type === 'file') {
-    const fileInputContainer = document.createElement('div');
-    fileInputContainer.className = 'file-input-container';
+      function renderInput(id, type) {
+        chatInputArea.innerHTML = '';
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group';
 
-    const fileInputLabel = document.createElement('label');
-    fileInputLabel.className = 'file-input-label';
-    fileInputLabel.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 8px;">
-        <path d="M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707V11.5z"/>
-        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-      </svg>
-      <div>Clique para selecionar ou arraste o arquivo</div>
-      <small>Tamanho máximo: 15MB</small>
-    `;
+        if (type === 'file') {
+          const fileInputContainer = document.createElement('div');
+          fileInputContainer.className = 'file-input-container';
 
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.id = id;
-    fileInput.className = 'file-input';
-    fileInput.accept = 'image/*';
+          const fileInputLabel = document.createElement('label');
+          fileInputLabel.className = 'file-input-label';
+          fileInputLabel.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 8px;">
+              <path d="M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707V11.5z"/>
+              <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+            </svg>
+            <div>Clique para selecionar ou arraste o arquivo</div>
+            <small>Tamanho máximo: 10MB</small>
+          `;
 
-    const previewContainer = document.createElement('div');
-    previewContainer.className = 'file-preview-container';
-    previewContainer.id = `${id}-preview`;
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.id = id;
+          fileInput.className = 'file-input';
+          fileInput.accept = 'image/*';
 
-    let selectedFile = null;
+          const previewContainer = document.createElement('div');
+          previewContainer.className = 'file-preview-container';
+          previewContainer.id = `${id}-preview`;
 
-    const sendButton = document.createElement('button');
-    sendButton.textContent = 'Enviar';
-    sendButton.addEventListener('click', () => handleFileUpload(id, selectedFile, fileInput));
-
-    fileInputContainer.appendChild(fileInput);
-    fileInputContainer.appendChild(fileInputLabel);
-
-    inputGroup.appendChild(fileInputContainer);
-    inputGroup.appendChild(previewContainer);
-    inputGroup.appendChild(sendButton);
-
-    fileInput.addEventListener('change', (e) => {
-      previewContainer.innerHTML = '';
-      selectedFile = null;
-      Array.from(e.target.files).forEach(file => {
-        if (file.size > MAX_FILE_SIZE) {
-          showNotification('Arquivo muito grande. O tamanho máximo é 15MB.', 'error');
-          fileInput.value = '';
-          return;
-        }
-        if (!file.type.match('image.*')) {
-          showNotification('Por favor, selecione apenas imagens.', 'error');
-          fileInput.value = '';
-          return;
-        }
-        selectedFile = file;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const previewDiv = document.createElement('div');
-          previewDiv.className = 'file-preview';
-
-          const img = document.createElement('img');
-          img.src = event.target.result;
-
-          const fileName = document.createElement('div');
-          fileName.className = 'file-name';
-          fileName.textContent = file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name;
-
-          const fileSize = document.createElement('div');
-          fileSize.className = 'file-size';
-          fileSize.textContent = formatFileSize(file.size);
-
-          const removeBtn = document.createElement('div');
-          removeBtn.className = 'file-remove';
-          removeBtn.innerHTML = '&times;';
-          removeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            previewDiv.remove();
-            fileInput.value = '';
-            selectedFile = null;
+          const sendButton = document.createElement('button');
+          sendButton.textContent = 'Enviar';
+          sendButton.addEventListener('click', () => {
+            if (fileInput.files.length === 0) {
+              showNotification('Por favor, selecione um arquivo antes de enviar.', 'error');
+              return;
+            }
+            handleFileUpload(id, fileInput);
           });
 
-          previewDiv.appendChild(img);
-          previewDiv.appendChild(fileName);
-          previewDiv.appendChild(fileSize);
-          previewDiv.appendChild(removeBtn);
-          previewContainer.appendChild(previewDiv);
-        };
-        reader.onerror = () => {
-          showNotification('Erro ao ler o arquivo. Tente novamente.', 'error');
-        };
-        reader.readAsDataURL(file);
-      });
-    });
+          fileInputContainer.appendChild(fileInput);
+          fileInputContainer.appendChild(fileInputLabel);
 
-    // Drag and drop
-    fileInputLabel.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      fileInputLabel.style.borderColor = 'var(--primary)';
-      fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
-    });
+          inputGroup.appendChild(fileInputContainer);
+          inputGroup.appendChild(previewContainer);
+          inputGroup.appendChild(sendButton);
 
-    fileInputLabel.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      fileInputLabel.style.borderColor = 'var(--light-gray)';
-      fileInputLabel.style.backgroundColor = 'transparent';
-    });
+          fileInput.addEventListener('change', (e) => {
+            previewContainer.innerHTML = '';
+            const files = e.target.files;
 
-    fileInputLabel.addEventListener('drop', (e) => {
-      e.preventDefault();
-      fileInputLabel.style.borderColor = 'var(--light-gray)';
-      fileInputLabel.style.backgroundColor = 'transparent';
+            if (!files || files.length === 0) return;
 
-      if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        const event = new Event('change');
-        fileInput.dispatchEvent(event);
+            const file = files[0];
+
+            // Verificação do tamanho do arquivo
+            if (file.size > MAX_FILE_SIZE) {
+              showNotification('O arquivo é muito grande. O tamanho máximo é 10MB.', 'error');
+              fileInput.value = '';
+              return;
+            }
+
+            // Verificação do tipo de arquivo
+            if (!file.type.match('image.*')) {
+              showNotification('Por favor, selecione apenas imagens (JPEG, PNG).', 'error');
+              fileInput.value = '';
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const previewDiv = document.createElement('div');
+              previewDiv.className = 'file-preview';
+
+              const img = document.createElement('img');
+              img.src = event.target.result;
+
+              const fileName = document.createElement('div');
+              fileName.className = 'file-name';
+              fileName.textContent = file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name;
+
+              const fileSize = document.createElement('div');
+              fileSize.className = 'file-size';
+              fileSize.textContent = formatFileSize(file.size);
+
+              const removeBtn = document.createElement('div');
+              removeBtn.className = 'file-remove';
+              removeBtn.innerHTML = '&times;';
+              removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                previewDiv.remove();
+                fileInput.value = '';
+              });
+
+              previewDiv.appendChild(img);
+              previewDiv.appendChild(fileName);
+              previewDiv.appendChild(fileSize);
+              previewDiv.appendChild(removeBtn);
+              previewContainer.appendChild(previewDiv);
+            };
+            reader.onerror = () => {
+              showNotification('Erro ao ler o arquivo. Tente novamente.', 'error');
+            };
+            reader.readAsDataURL(file);
+          });
+
+          // Drag and drop
+          fileInputLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileInputLabel.style.borderColor = 'var(--primary)';
+            fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+          });
+
+          fileInputLabel.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileInputLabel.style.borderColor = 'var(--light-gray)';
+            fileInputLabel.style.backgroundColor = 'transparent';
+          });
+
+          fileInputLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileInputLabel.style.borderColor = 'var(--light-gray)';
+            fileInputLabel.style.backgroundColor = 'transparent';
+
+            if (e.dataTransfer.files.length) {
+              fileInput.files = e.dataTransfer.files;
+              const event = new Event('change');
+              fileInput.dispatchEvent(event);
+            }
+          });
+        } else {
+          const input = document.createElement('input');
+          input.type = type;
+          input.id = id;
+          input.placeholder = `Digite seu ${id.replace(/([A-Z])/g, ' $1').toLowerCase()}...`;
+
+          // Máscara para telefone
+          if (id === 'phone') {
+            input.addEventListener('input', function (e) {
+              let value = e.target.value.replace(/\D/g, '');
+              if (value.length > 11) value = value.substring(0, 11);
+              if (value.length > 0) {
+                value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7, 11)}`;
+              }
+              e.target.value = value;
+            });
+          }
+
+          // Máscara para CPF
+          if (id === 'cpf') {
+            input.addEventListener('input', function (e) {
+              let value = e.target.value.replace(/\D/g, '');
+              if (value.length > 11) value = value.substring(0, 11);
+              if (value.length > 0) {
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+              }
+              e.target.value = value;
+            });
+          }
+
+          const sendButton = document.createElement('button');
+          sendButton.textContent = 'Enviar';
+          sendButton.addEventListener('click', () => handleTextInput(id, input));
+
+          input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendButton.click();
+          });
+
+          inputGroup.appendChild(input);
+          inputGroup.appendChild(sendButton);
+        }
+
+        chatInputArea.appendChild(inputGroup);
       }
-    });
-  } else {
-    const input = document.createElement('input');
-    input.type = type;
-    input.id = id;
-    input.placeholder = `Digite seu ${id.replace(/([A-Z])/g, ' $1').toLowerCase()}...`;
 
-    // Máscara para telefone
-    if (id === 'phone') {
-      input.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length > 11) value = value.substring(0, 11);
-        if (value.length > 0) {
-          value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7, 11)}`;
-        }
-        e.target.value = value;
-      });
-    }
-
-    // Máscara para CPF
-    if (id === 'cpf') {
-      input.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length > 11) value = value.substring(0, 11);
-        if (value.length > 0) {
-          value = value.replace(/(\d{3})(\d)/, '$1.$2');
-          value = value.replace(/(\d{3})(\d)/, '$1.$2');
-          value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        }
-        e.target.value = value;
-      });
-    }
-
-    const sendButton = document.createElement('button');
-    sendButton.textContent = 'Enviar';
-    sendButton.addEventListener('click', () => handleTextInput(id, input));
-
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendButton.click();
-    });
-
-    inputGroup.appendChild(input);
-    inputGroup.appendChild(sendButton);
-  }
-
-  chatInputArea.appendChild(inputGroup);
-}
-// ...fim da função renderInput...
-     
       async function handleFileUpload(id, input) {
         const files = input.files;
         if (!files || files.length === 0) {
@@ -1116,12 +1153,12 @@ function renderInput(id, type) {
         loadingChat.classList.remove('hidden');
         try {
           const file = files[0];
-          
+
           // Verificação do tamanho do arquivo
           if (file.size > MAX_FILE_SIZE) {
-            throw new Error('O arquivo é muito grande. O tamanho máximo é 15MB.');
+            throw new Error('O arquivo é muito grande. O tamanho máximo é 10MB.');
           }
-          
+
           // Verificação do tipo de arquivo
           if (!file.type.match('image.*')) {
             throw new Error('Por favor, envie apenas imagens (JPEG, PNG).');
@@ -1129,25 +1166,25 @@ function renderInput(id, type) {
 
           // Comprime a imagem antes de enviar
           const compressedFile = await compressImageFile(file, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, IMAGE_QUALITY);
-          
+
           // Converte para base64
           const base64 = await readFileAsBase64(compressedFile);
-          
+
           // Armazena os dados
           collectedData[id] = base64;
-          
+
           // Feedback para o usuário
           addUserMessage(`Arquivo enviado: ${file.name} (${formatFileSize(compressedFile.size)})`);
-          
+
           // Limpa o input e a pré-visualização
           input.value = '';
           document.getElementById(`${id}-preview`).innerHTML = '';
-          
+
           // Avança para a próxima pergunta
           currentQuestionIndex++;
           updateProgressBar();
           displayQuestion();
-          
+
           showNotification('Arquivo enviado com sucesso!', 'success');
         } catch (error) {
           console.error('Erro ao processar arquivo:', error);
@@ -1161,43 +1198,43 @@ function renderInput(id, type) {
       async function compressImageFile(file, maxWidth, maxHeight, quality) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
-          
-          reader.onload = function(event) {
+
+          reader.onload = function (event) {
             const img = new Image();
             img.src = event.target.result;
-            
-            img.onerror = function() {
+
+            img.onerror = function () {
               reject(new Error('Falha ao carregar a imagem'));
             };
-            
-            img.onload = function() {
+
+            img.onload = function () {
               // Calcula as novas dimensões mantendo a proporção
               let width = img.width;
               let height = img.height;
-              
+
               if (width > maxWidth) {
                 const ratio = maxWidth / width;
                 width = maxWidth;
                 height = height * ratio;
               }
-              
+
               if (height > maxHeight) {
                 const ratio = maxHeight / height;
                 height = maxHeight;
                 width = width * ratio;
               }
-              
+
               // Cria canvas para redimensionamento
               const canvas = document.createElement('canvas');
               canvas.width = width;
               canvas.height = height;
-              
+
               const ctx = canvas.getContext('2d');
-              
+
               // Melhora a qualidade do redimensionamento
               ctx.imageSmoothingQuality = 'high';
               ctx.drawImage(img, 0, 0, width, height);
-              
+
               // Converte para blob com qualidade reduzida
               canvas.toBlob(
                 (blob) => {
@@ -1205,7 +1242,7 @@ function renderInput(id, type) {
                     reject(new Error('Falha na compressão da imagem'));
                     return;
                   }
-                  
+
                   // Cria um novo arquivo com os metadados originais
                   resolve(new File([blob], file.name, {
                     type: 'image/jpeg',
@@ -1217,18 +1254,18 @@ function renderInput(id, type) {
               );
             };
           };
-          
-          reader.onerror = function() {
+
+          reader.onerror = function () {
             reject(new Error('Falha ao ler o arquivo'));
           };
-          
+
           reader.readAsDataURL(file);
         });
       }
 
       function handleTextInput(id, input) {
         let value = input.value.trim();
-        
+
         // Remove formatação do telefone antes de salvar
         if (id === 'phone') {
           value = value.replace(/\D/g, '');
@@ -1237,7 +1274,7 @@ function renderInput(id, type) {
             return;
           }
         }
-        
+
         // Remove formatação do CPF antes de salvar
         if (id === 'cpf') {
           value = value.replace(/\D/g, '');
@@ -1246,7 +1283,7 @@ function renderInput(id, type) {
             return;
           }
         }
-        
+
         if (!value) {
           addBotMessage('Por favor, preencha este campo.');
           return;
@@ -1266,7 +1303,7 @@ function renderInput(id, type) {
         }
         return phone;
       }
-      
+
       function formatCPF(cpf) {
         if (cpf.length === 11) {
           return `${cpf.substring(0, 3)}.${cpf.substring(3, 6)}.${cpf.substring(6, 9)}-${cpf.substring(9, 11)}`;
@@ -1287,35 +1324,35 @@ function renderInput(id, type) {
         loadingChat.classList.remove('hidden');
         try {
           // Verifica se todos os campos obrigatórios foram preenchidos
-          const requiredFields = ['fullName', 'age', 'phone', 'cpf', 'rg', 'pis', 
-                                'proofOfResidencePhoto', 'cpfPhoto', 'rgFrontPhoto', 'rgBackPhoto'];
+          const requiredFields = ['fullName', 'age', 'phone', 'cpf', 'rg', 'pis',
+            'proofOfResidencePhoto', 'cpfPhoto', 'rgFrontPhoto', 'rgBackPhoto'];
           const missingFields = requiredFields.filter(field => !collectedData[field]);
-          
+
           if (missingFields.length > 0) {
             throw new Error(`Faltam campos obrigatórios: ${missingFields.join(', ')}`);
           }
 
-          const docRef = await addDoc(collection(db, 'applications'), {
+          // Simula o envio para um banco de dados
+          const application = {
+            id: crypto.randomUUID().substring(0, 8),
             userId: currentUserId,
             ...collectedData,
             submissionDate: new Date().toISOString(),
             status: 'pending'
-          });
-          
+          };
+
+          // Armazena localmente (em produção, substituir por chamada ao Firebase)
+          applicationsData.push(application);
+
           showNotification('Candidatura enviada com sucesso!', 'success');
-          addBotMessage(`✅ <strong>Candidatura enviada com sucesso!</strong><br>Seu ID de registro é: <code>${docRef.id}</code>`);
+          addBotMessage(`✅ <strong>Candidatura enviada com sucesso!</strong><br>Seu ID de registro é: <code>${application.id}</code>`);
           resetForm();
         } catch (error) {
           console.error('Erro ao enviar candidatura:', error);
-          
-          if (error.message.includes('permission')) {
-            addBotMessage('❌ <strong>Erro:</strong> Sem permissão para enviar. Verifique sua conexão e tente novamente.');
-            showNotification('Erro de conexão. Verifique sua internet.', 'error');
-          } else {
-            addBotMessage(`❌ <strong>Erro ao enviar candidatura:</strong> ${error.message}`);
-            showNotification('Erro ao enviar candidatura.', 'error');
-          }
-          
+
+          addBotMessage(`❌ <strong>Erro ao enviar candidatura:</strong> ${error.message}`);
+          showNotification('Erro ao enviar candidatura.', 'error');
+
           const retryButton = document.createElement('button');
           retryButton.textContent = 'Tentar Novamente';
           retryButton.className = 'btn btn-primary';
@@ -1359,7 +1396,7 @@ function renderInput(id, type) {
           reader.readAsDataURL(file);
         });
       }
-      
+
       function showNotification(message, type = 'success') {
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
@@ -1367,13 +1404,13 @@ function renderInput(id, type) {
           <div>${message}</div>
           <div class="notification-close">&times;</div>
         `;
-        
+
         document.body.appendChild(notification);
-        
+
         notification.querySelector('.notification-close').addEventListener('click', () => {
           notification.remove();
         });
-        
+
         setTimeout(() => {
           notification.remove();
         }, 5000);
@@ -1408,33 +1445,24 @@ function renderInput(id, type) {
         loadingData.classList.remove('hidden');
         applicationsTableBody.innerHTML = '';
 
-        const q = query(
-          collection(db, 'applications'),
-          or(
-            where('fullName', '>=', searchTerm),
-            where('fullName', '<=', searchTerm + '\uf8ff'),
-            where('cpf', '==', searchTerm.replace(/\D/g, ''))
-          )
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          loadingData.classList.add('hidden');
-          
-          if (snapshot.empty) {
-            noDataMessage.classList.remove('hidden');
-            noDataMessage.textContent = 'Nenhuma candidatura encontrada com os critérios de busca.';
-            return;
-          }
-
-          renderApplicationsTable(snapshot);
-          showNotification(`${snapshot.size} candidatura(s) encontrada(s)`, 'success');
-        }, (error) => {
-          console.error('Erro ao buscar candidaturas:', error);
-          loadingData.classList.add('hidden');
-          noDataMessage.classList.remove('hidden');
-          noDataMessage.textContent = 'Erro ao buscar candidaturas.';
-          showNotification('Erro na busca', 'error');
+        const filtered = applicationsData.filter(app => {
+          const cpf = app.cpf ? app.cpf.replace(/\D/g, '') : '';
+          return (
+            app.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            cpf.includes(searchTerm.replace(/\D/g, ''))
+          );
         });
+
+        loadingData.classList.add('hidden');
+
+        if (filtered.length === 0) {
+          noDataMessage.classList.remove('hidden');
+          noDataMessage.textContent = 'Nenhuma candidatura encontrada com os critérios de busca.';
+          return;
+        }
+
+        renderApplicationsTable(filtered);
+        showNotification(`${filtered.length} candidatura(s) encontrada(s)`, 'success');
       }
 
       function resetSearchResults() {
@@ -1447,67 +1475,57 @@ function renderInput(id, type) {
         noDataMessage.classList.add('hidden');
         applicationsTableBody.innerHTML = '';
 
-        const q = query(collection(db, 'applications'));
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        // Simula carregamento de dados
+        setTimeout(() => {
           loadingData.classList.add('hidden');
-          applicationsSnapshot = snapshot;
-          
-          if (snapshot.empty) {
+
+          if (applicationsData.length === 0) {
             noDataMessage.classList.remove('hidden');
             noDataMessage.textContent = 'Nenhuma candidatura encontrada.';
             return;
           }
 
-          renderApplicationsTable(snapshot);
-        }, (error) => {
-          console.error('Erro ao carregar candidaturas:', error);
-          loadingData.classList.add('hidden');
-          noDataMessage.classList.remove('hidden');
-          noDataMessage.textContent = 'Erro ao carregar candidaturas.';
-          showNotification('Erro ao carregar dados', 'error');
-        });
+          renderApplicationsTable(applicationsData);
+        }, 500);
       }
 
-      function renderApplicationsTable(snapshot) {
+      function renderApplicationsTable(applications) {
         applicationsTableBody.innerHTML = '';
         noDataMessage.classList.add('hidden');
-        
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const row = document.createElement('tr');
-          
-          const formattedPhone = data.phone ? 
-            `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
+
+        applications.forEach(app => {
+          const formattedPhone = app.phone ?
+            `(${app.phone.substring(0, 2)}) ${app.phone.substring(2, 7)}-${app.phone.substring(7, 11)}` :
             'N/A';
-          
+
           let initials = 'NN';
-          if (data.fullName) {
-            const names = data.fullName.split(' ');
-            initials = names[0][0] + (names.length > 1 ? names[names.length-1][0] : names[0][1] || '');
+          if (app.fullName) {
+            const names = app.fullName.split(' ');
+            initials = names[0][0] + (names.length > 1 ? names[names.length - 1][0] : names[0][1] || '');
           }
-          
+
+          const row = document.createElement('tr');
           row.innerHTML = `
-            <td><small>${doc.id.substring(0, 8)}</small></td>
+            <td><small>${app.id}</small></td>
             <td>
               <div style="display: flex; align-items: center; gap: 10px;">
                 <div class="avatar">${initials.toUpperCase()}</div>
-                <div>${data.fullName || 'N/A'}</div>
+                <div>${app.fullName || 'N/A'}</div>
               </div>
             </td>
             <td>${formattedPhone}</td>
-            <td>${data.age || 'N/A'}</td>
-            <td>${data.cpf ? formatCPF(data.cpf) : 'N/A'}</td>
-            <td>${new Date(data.submissionDate).toLocaleDateString()}</td>
+            <td>${app.age || 'N/A'}</td>
+            <td>${app.cpf ? formatCPF(app.cpf) : 'N/A'}</td>
+            <td>${new Date(app.submissionDate).toLocaleDateString()}</td>
             <td>
               <div style="display: flex; gap: 5px;">
-                ${data.rgFrontPhoto ? `<img src="${data.rgFrontPhoto}" alt="RG Frente" class="document-thumbnail" style="cursor:pointer;" onclick="showModal('${data.rgFrontPhoto}', 'RG Frente')">` : ''}
-                ${data.rgBackPhoto ? `<img src="${data.rgBackPhoto}" alt="RG Verso" class="document-thumbnail" style="cursor:pointer;" onclick="showModal('${data.rgBackPhoto}', 'RG Verso')">` : ''}
-                ${data.cpfPhoto ? `<img src="${data.cpfPhoto}" alt="CPF" class="document-thumbnail" style="cursor:pointer;" onclick="showModal('${data.cpfPhoto}', 'CPF')">` : ''}
+                ${app.rgFrontPhoto ? `<img src="${app.rgFrontPhoto}" alt="RG Frente" class="document-thumbnail" style="cursor:pointer;" onclick="showModal('${app.rgFrontPhoto}', 'RG Frente')">` : ''}
+                ${app.rgBackPhoto ? `<img src="${app.rgBackPhoto}" alt="RG Verso" class="document-thumbnail" style="cursor:pointer;" onclick="showModal('${app.rgBackPhoto}', 'RG Verso')">` : ''}
+                ${app.cpfPhoto ? `<img src="${app.cpfPhoto}" alt="CPF" class="document-thumbnail" style="cursor:pointer;" onclick="showModal('${app.cpfPhoto}', 'CPF')">` : ''}
               </div>
             </td>
             <td>
-              <button class="btn btn-primary btn-sm view-btn" data-id="${doc.id}">
+              <button class="btn btn-primary btn-sm view-btn" data-id="${app.id}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
                   <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
                   <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
@@ -1516,7 +1534,7 @@ function renderInput(id, type) {
               </button>
             </td>
           `;
-          
+
           applicationsTableBody.appendChild(row);
         });
 
@@ -1525,32 +1543,30 @@ function renderInput(id, type) {
         });
       }
 
-      async function viewApplicationDetails(appId) {
-        const docRef = doc(db, 'applications', appId);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const formattedPhone = data.phone ? 
-            `(${data.phone.substring(0, 2)}) ${data.phone.substring(2, 7)}-${data.phone.substring(7, 11)}` : 
+      function viewApplicationDetails(appId) {
+        const app = applicationsData.find(a => a.id === appId);
+
+        if (app) {
+          const formattedPhone = app.phone ?
+            `(${app.phone.substring(0, 2)}) ${app.phone.substring(2, 7)}-${app.phone.substring(7, 11)}` :
             'Não informado';
-          
+
           let details = `
             <div style="max-width: 800px; padding: 20px;">
               <h3 style="color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--light-gray); padding-bottom: 10px;">Detalhes da Candidatura</h3>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
-                  <p><strong>ID:</strong> ${appId}</p>
-                  <p><strong>Nome:</strong> ${data.fullName}</p>
+                  <p><strong>ID:</strong> ${app.id}</p>
+                  <p><strong>Nome:</strong> ${app.fullName}</p>
                   <p><strong>Telefone:</strong> ${formattedPhone}</p>
-                  <p><strong>Idade:</strong> ${data.age}</p>
+                  <p><strong>Idade:</strong> ${app.age}</p>
                 </div>
                 <div>
-                  <p><strong>CPF:</strong> ${formatCPF(data.cpf)}</p>
-                  <p><strong>RG:</strong> ${data.rg}</p>
-                  <p><strong>PIS:</strong> ${data.pis}</p>
-                  <p><strong>Data:</strong> ${new Date(data.submissionDate).toLocaleString()}</p>
+                  <p><strong>CPF:</strong> ${formatCPF(app.cpf)}</p>
+                  <p><strong>RG:</strong> ${app.rg}</p>
+                  <p><strong>PIS:</strong> ${app.pis}</p>
+                  <p><strong>Data:</strong> ${new Date(app.submissionDate).toLocaleString()}</p>
                 </div>
               </div>
               
@@ -1558,24 +1574,24 @@ function renderInput(id, type) {
               <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div>
                   <h5>Frente do RG</h5>
-                  <img src="${data.rgFrontPhoto}" style="max-width:100%; cursor:pointer; border-radius: var(--radius-sm); border: 1px solid var(--light-gray);" onclick="showModal('${data.rgFrontPhoto}', 'Frente do RG')">
+                  <img src="${app.rgFrontPhoto}" style="max-width:100%; cursor:pointer; border-radius: var(--radius-sm); border: 1px solid var(--light-gray);" onclick="showModal('${app.rgFrontPhoto}', 'Frente do RG')">
                 </div>
                 <div>
                   <h5>Verso do RG</h5>
-                  <img src="${data.rgBackPhoto}" style="max-width:100%; cursor:pointer; border-radius: var(--radius-sm); border: 1px solid var(--light-gray);" onclick="showModal('${data.rgBackPhoto}', 'Verso do RG')">
+                  <img src="${app.rgBackPhoto}" style="max-width:100%; cursor:pointer; border-radius: var(--radius-sm); border: 1px solid var(--light-gray);" onclick="showModal('${app.rgBackPhoto}', 'Verso do RG')">
                 </div>
                 <div>
                   <h5>CPF</h5>
-                  <img src="${data.cpfPhoto}" style="max-width:100%; cursor:pointer; border-radius: var(--radius-sm); border: 1px solid var(--light-gray);" onclick="showModal('${data.cpfPhoto}', 'CPF')">
+                  <img src="${app.cpfPhoto}" style="max-width:100%; cursor:pointer; border-radius: var(--radius-sm); border: 1px solid var(--light-gray);" onclick="showModal('${app.cpfPhoto}', 'CPF')">
                 </div>
                 <div>
                   <h5>Comprovante de Residência</h5>
-                  <img src="${data.proofOfResidencePhoto}" style="max-width:100%; cursor:pointer; border-radius: var(--radius-sm); border: 1px solid var(--light-gray);" onclick="showModal('${data.proofOfResidencePhoto}', 'Comprovante de Residência')">
+                  <img src="${app.proofOfResidencePhoto}" style="max-width:100%; cursor:pointer; border-radius: var(--radius-sm); border: 1px solid var(--light-gray);" onclick="showModal('${app.proofOfResidencePhoto}', 'Comprovante de Residência')">
                 </div>
               </div>
             </div>
           `;
-          
+
           const detailModal = document.createElement('div');
           detailModal.className = 'modal';
           detailModal.innerHTML = `
@@ -1589,10 +1605,10 @@ function renderInput(id, type) {
               </div>
             </div>
           `;
-          
+
           document.body.appendChild(detailModal);
           detailModal.style.display = 'block';
-          
+
           detailModal.querySelector('.close-modal').addEventListener('click', () => {
             detailModal.style.display = 'none';
             setTimeout(() => detailModal.remove(), 300);
@@ -1601,7 +1617,7 @@ function renderInput(id, type) {
           showNotification('Candidatura não encontrada!', 'error');
         }
       }
-      
+
       function setupModal() {
         closeModal.addEventListener('click', () => {
           photoModal.style.display = 'none';
@@ -1622,4 +1638,5 @@ function renderInput(id, type) {
     });
   </script>
 </body>
+
 </html>
