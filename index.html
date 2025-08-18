@@ -936,174 +936,176 @@
         const progress = (currentQuestionIndex / questions.length) * 100;
         progressBar.style.width = `${progress}%`;
       }
+// ...substitua toda a função renderInput por esta versão...
+function renderInput(id, type) {
+  chatInputArea.innerHTML = '';
+  const inputGroup = document.createElement('div');
+  inputGroup.className = 'input-group';
 
-      function renderInput(id, type) {
-        chatInputArea.innerHTML = '';
-        const inputGroup = document.createElement('div');
-        inputGroup.className = 'input-group';
+  if (type === 'file') {
+    const fileInputContainer = document.createElement('div');
+    fileInputContainer.className = 'file-input-container';
 
-        if (type === 'file') {
-          const fileInputContainer = document.createElement('div');
-          fileInputContainer.className = 'file-input-container';
-          
-          const fileInputLabel = document.createElement('label');
-          fileInputLabel.className = 'file-input-label';
-          fileInputLabel.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 8px;">
-              <path d="M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707V11.5z"/>
-              <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
-            </svg>
-            <div>Clique para selecionar ou arraste o arquivo</div>
-            <small>Tamanho máximo: 15MB</small>
-          `;
-          
-          const fileInput = document.createElement('input');
-          fileInput.type = 'file';
-          fileInput.id = id;
-          fileInput.className = 'file-input';
-          fileInput.accept = 'image/*';
-          
-          const previewContainer = document.createElement('div');
-          previewContainer.className = 'file-preview-container';
-          previewContainer.id = `${id}-preview`;
-          
-          const sendButton = document.createElement('button');
-          sendButton.textContent = 'Enviar';
-          sendButton.addEventListener('click', () => handleFileUpload(id, fileInput));
+    const fileInputLabel = document.createElement('label');
+    fileInputLabel.className = 'file-input-label';
+    fileInputLabel.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 8px;">
+        <path d="M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707V11.5z"/>
+        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+      </svg>
+      <div>Clique para selecionar ou arraste o arquivo</div>
+      <small>Tamanho máximo: 15MB</small>
+    `;
 
-          fileInputContainer.appendChild(fileInput);
-          fileInputContainer.appendChild(fileInputLabel);
-          
-          inputGroup.appendChild(fileInputContainer);
-          inputGroup.appendChild(previewContainer);
-          inputGroup.appendChild(sendButton);
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.id = id;
+    fileInput.className = 'file-input';
+    fileInput.accept = 'image/*';
 
-          fileInput.addEventListener('change', (e) => {
-            previewContainer.innerHTML = '';
-            Array.from(e.target.files).forEach(file => {
-              if (file.size > MAX_FILE_SIZE) {
-                showNotification('Arquivo muito grande. O tamanho máximo é 15MB.', 'error');
-                return;
-              }
-              
-              if (!file.type.match('image.*')) {
-                showNotification('Por favor, selecione apenas imagens.', 'error');
-                return;
-              }
-              
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                const previewDiv = document.createElement('div');
-                previewDiv.className = 'file-preview';
-                
-                const img = document.createElement('img');
-                img.src = event.target.result;
-                
-                const fileName = document.createElement('div');
-                fileName.className = 'file-name';
-                fileName.textContent = file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name;
-                
-                const fileSize = document.createElement('div');
-                fileSize.className = 'file-size';
-                fileSize.textContent = formatFileSize(file.size);
-                
-                const removeBtn = document.createElement('div');
-                removeBtn.className = 'file-remove';
-                removeBtn.innerHTML = '&times;';
-                removeBtn.addEventListener('click', (e) => {
-                  e.stopPropagation();
-                  previewDiv.remove();
-                  fileInput.value = '';
-                });
-                
-                previewDiv.appendChild(img);
-                previewDiv.appendChild(fileName);
-                previewDiv.appendChild(fileSize);
-                previewDiv.appendChild(removeBtn);
-                previewContainer.appendChild(previewDiv);
-              };
-              reader.onerror = () => {
-                showNotification('Erro ao ler o arquivo. Tente novamente.', 'error');
-              };
-              reader.readAsDataURL(file);
-            });
-          });
-          
-          // Drag and drop
-          fileInputLabel.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileInputLabel.style.borderColor = 'var(--primary)';
-            fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
-          });
-          
-          fileInputLabel.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            fileInputLabel.style.borderColor = 'var(--light-gray)';
-            fileInputLabel.style.backgroundColor = 'transparent';
-          });
-          
-          fileInputLabel.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileInputLabel.style.borderColor = 'var(--light-gray)';
-            fileInputLabel.style.backgroundColor = 'transparent';
-            
-            if (e.dataTransfer.files.length) {
-              fileInput.files = e.dataTransfer.files;
-              const event = new Event('change');
-              fileInput.dispatchEvent(event);
-            }
-          });
-        } else {
-          const input = document.createElement('input');
-          input.type = type;
-          input.id = id;
-          input.placeholder = `Digite seu ${id.replace(/([A-Z])/g, ' $1').toLowerCase()}...`;
-          
-          // Adiciona máscara para telefone
-          if (id === 'phone') {
-            input.addEventListener('input', function(e) {
-              let value = e.target.value.replace(/\D/g, '');
-              if (value.length > 11) value = value.substring(0, 11);
-              
-              if (value.length > 0) {
-                value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7, 11)}`;
-              }
-              
-              e.target.value = value;
-            });
-          }
-          
-          // Adiciona máscara para CPF
-          if (id === 'cpf') {
-            input.addEventListener('input', function(e) {
-              let value = e.target.value.replace(/\D/g, '');
-              if (value.length > 11) value = value.substring(0, 11);
-              
-              if (value.length > 0) {
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-              }
-              
-              e.target.value = value;
-            });
-          }
-          
-          const sendButton = document.createElement('button');
-          sendButton.textContent = 'Enviar';
-          sendButton.addEventListener('click', () => handleTextInput(id, input));
+    const previewContainer = document.createElement('div');
+    previewContainer.className = 'file-preview-container';
+    previewContainer.id = `${id}-preview`;
 
-          input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendButton.click();
-          });
+    let selectedFile = null;
 
-          inputGroup.appendChild(input);
-          inputGroup.appendChild(sendButton);
+    const sendButton = document.createElement('button');
+    sendButton.textContent = 'Enviar';
+    sendButton.addEventListener('click', () => handleFileUpload(id, selectedFile, fileInput));
+
+    fileInputContainer.appendChild(fileInput);
+    fileInputContainer.appendChild(fileInputLabel);
+
+    inputGroup.appendChild(fileInputContainer);
+    inputGroup.appendChild(previewContainer);
+    inputGroup.appendChild(sendButton);
+
+    fileInput.addEventListener('change', (e) => {
+      previewContainer.innerHTML = '';
+      selectedFile = null;
+      Array.from(e.target.files).forEach(file => {
+        if (file.size > MAX_FILE_SIZE) {
+          showNotification('Arquivo muito grande. O tamanho máximo é 15MB.', 'error');
+          fileInput.value = '';
+          return;
         }
+        if (!file.type.match('image.*')) {
+          showNotification('Por favor, selecione apenas imagens.', 'error');
+          fileInput.value = '';
+          return;
+        }
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const previewDiv = document.createElement('div');
+          previewDiv.className = 'file-preview';
 
-        chatInputArea.appendChild(inputGroup);
+          const img = document.createElement('img');
+          img.src = event.target.result;
+
+          const fileName = document.createElement('div');
+          fileName.className = 'file-name';
+          fileName.textContent = file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name;
+
+          const fileSize = document.createElement('div');
+          fileSize.className = 'file-size';
+          fileSize.textContent = formatFileSize(file.size);
+
+          const removeBtn = document.createElement('div');
+          removeBtn.className = 'file-remove';
+          removeBtn.innerHTML = '&times;';
+          removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            previewDiv.remove();
+            fileInput.value = '';
+            selectedFile = null;
+          });
+
+          previewDiv.appendChild(img);
+          previewDiv.appendChild(fileName);
+          previewDiv.appendChild(fileSize);
+          previewDiv.appendChild(removeBtn);
+          previewContainer.appendChild(previewDiv);
+        };
+        reader.onerror = () => {
+          showNotification('Erro ao ler o arquivo. Tente novamente.', 'error');
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Drag and drop
+    fileInputLabel.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileInputLabel.style.borderColor = 'var(--primary)';
+      fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+    });
+
+    fileInputLabel.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      fileInputLabel.style.borderColor = 'var(--light-gray)';
+      fileInputLabel.style.backgroundColor = 'transparent';
+    });
+
+    fileInputLabel.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileInputLabel.style.borderColor = 'var(--light-gray)';
+      fileInputLabel.style.backgroundColor = 'transparent';
+
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        const event = new Event('change');
+        fileInput.dispatchEvent(event);
       }
+    });
+  } else {
+    const input = document.createElement('input');
+    input.type = type;
+    input.id = id;
+    input.placeholder = `Digite seu ${id.replace(/([A-Z])/g, ' $1').toLowerCase()}...`;
 
+    // Máscara para telefone
+    if (id === 'phone') {
+      input.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.substring(0, 11);
+        if (value.length > 0) {
+          value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7, 11)}`;
+        }
+        e.target.value = value;
+      });
+    }
+
+    // Máscara para CPF
+    if (id === 'cpf') {
+      input.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.substring(0, 11);
+        if (value.length > 0) {
+          value = value.replace(/(\d{3})(\d)/, '$1.$2');
+          value = value.replace(/(\d{3})(\d)/, '$1.$2');
+          value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        }
+        e.target.value = value;
+      });
+    }
+
+    const sendButton = document.createElement('button');
+    sendButton.textContent = 'Enviar';
+    sendButton.addEventListener('click', () => handleTextInput(id, input));
+
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendButton.click();
+    });
+
+    inputGroup.appendChild(input);
+    inputGroup.appendChild(sendButton);
+  }
+
+  chatInputArea.appendChild(inputGroup);
+}
+// ...fim da função renderInput...
+     
       async function handleFileUpload(id, input) {
         const files = input.files;
         if (!files || files.length === 0) {
