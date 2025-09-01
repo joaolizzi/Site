@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "firebase": "^12.0.0"
+    "firebase": "^12.0.0",
+    "make": "^0.8.1"
   }
 }

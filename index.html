@@ -911,7 +911,7 @@
 
       // Configurações
       const ADMIN_PASSWORD = 'mmgadmin';
-      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10Megabytes
       const MAX_IMAGE_WIDTH = 800;
       const MAX_IMAGE_HEIGHT = 800;
       const IMAGE_QUALITY = 0.7;
@@ -1392,7 +1392,7 @@
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result);
-          reader.onerror = error => reject(error);
+          reader.onerror =  error => reject(error);
           reader.readAsDataURL(file);
         });
       }
